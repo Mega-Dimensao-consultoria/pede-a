@@ -17,6 +17,7 @@ import { Route as SucessoOrderIdRouteImport } from './routes/sucesso.$orderId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
 import { Route as AdminCategoriasRouteImport } from './routes/admin/categorias'
+import { Route as AdminBairrosRouteImport } from './routes/admin/bairros'
 
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
@@ -58,12 +59,18 @@ const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   path: '/admin/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBairrosRoute = AdminBairrosRouteImport.update({
+  id: '/admin/bairros',
+  path: '/admin/bairros',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
+  AdminBairrosRoute: typeof AdminBairrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/bairros': {
+      id: '/admin/bairros'
+      path: '/admin/bairros'
+      fullPath: '/admin/bairros'
+      preLoaderRoute: typeof AdminBairrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
+  AdminBairrosRoute: AdminBairrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   ProdutoIdRoute: ProdutoIdRoute,
@@ -208,3 +229,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
