@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BR_STATES } from "@/lib/br-states";
 import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2 } from "lucide-react";
 import { maskPhone, maskCPF, maskCEP, onlyDigits, isValidCPF } from "@/lib/format";
 import { toast } from "sonner";
@@ -399,11 +401,17 @@ function ContaPage() {
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>UF</Label>
-                <Input
+                <Select
                   value={addrModal.data.estado ?? ""}
-                  onChange={(e) => setAddrModal((m) => ({ ...m, data: { ...m.data, estado: e.target.value.toUpperCase().slice(0, 2) } }))}
-                  maxLength={2}
-                />
+                  onValueChange={(v) => setAddrModal((m) => ({ ...m, data: { ...m.data, estado: v } }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                  <SelectContent>
+                    {BR_STATES.map((s) => (
+                      <SelectItem key={s.uf} value={s.uf}>{s.uf}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="col-span-2">
                 <Label>Referência</Label>
