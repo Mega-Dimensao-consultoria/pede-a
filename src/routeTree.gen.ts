@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SucessoOrderIdRouteImport } from './routes/sucesso.$orderId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
+import { Route as AdminCategoriasRouteImport } from './routes/admin/categorias'
 
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
@@ -52,12 +53,18 @@ const AdminPedidosRoute = AdminPedidosRouteImport.update({
   path: '/admin/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
+  id: '/admin/categorias',
+  path: '/admin/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
     | '/sucesso/$orderId'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
     | '/sucesso/$orderId'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carrinho'
     | '/checkout'
+    | '/admin/categorias'
     | '/admin/pedidos'
     | '/produto/$id'
     | '/sucesso/$orderId'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
+  AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   SucessoOrderIdRoute: typeof SucessoOrderIdRoute
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/categorias': {
+      id: '/admin/categorias'
+      path: '/admin/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AdminCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
+  AdminCategoriasRoute: AdminCategoriasRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   SucessoOrderIdRoute: SucessoOrderIdRoute,
