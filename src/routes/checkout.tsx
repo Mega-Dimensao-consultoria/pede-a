@@ -84,6 +84,20 @@ function Checkout() {
 
   const selectedAddress = (savedAddresses as any[]).find((a) => a.id === selectedAddressId);
 
+  // When a saved address is selected, try to auto-match the delivery bairro by name
+  useEffect(() => {
+    if (!selectedAddress || bairroId || bairros.length === 0) return;
+    const norm = (s: string) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const target = norm(selectedAddress.bairro || "");
+    if (!target) return;
+    const match = (bairros as any[]).find((b) => norm(b.nome) === target);
+    if (match) setBairroId(match.id);
+    else {
+      const outros = (bairros as any[]).find((b) => b.is_outros);
+      if (outros) setBairroId(outros.id);
+    }
+  }, [selectedAddress, bairros, bairroId]);
+
   const buscarCep = async () => {
     const d = onlyDigits(cep);
     if (d.length !== 8) return;
