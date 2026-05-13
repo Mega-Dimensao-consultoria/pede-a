@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BR_STATES } from "@/lib/br-states";
-import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2 } from "lucide-react";
+import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { maskPhone, maskCPF, maskCEP, onlyDigits, isValidCPF } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -54,6 +54,8 @@ function ContaPage() {
   const [nome, setNome] = useState("");
   const [sobrenome, setSobrenome] = useState("");
   const [cpf, setCpf] = useState("");
+  const [cpfTouched, setCpfTouched] = useState(false);
+  const [nomeTouched, setNomeTouched] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -104,11 +106,29 @@ function ContaPage() {
     navigate({ to: "/" });
   };
 
+  const cpfDigits = onlyDigits(cpf);
+  const cpfError: string | null = (() => {
+    if (cpfDigits.length === 0) return null;
+    if (cpfDigits.length < 11) return "CPF incompleto — digite os 11 dígitos.";
+    if (/^(\d)\1+$/.test(cpfDigits)) return "CPF inválido — números repetidos não são aceitos.";
+    if (!isValidCPF(cpfDigits)) return "CPF inválido — verifique os dígitos.";
+    return null;
+  })();
+  const cpfValid = cpfDigits.length === 11 && !cpfError;
+  const nomeError = nome.trim().length === 0 ? "Informe seu nome." : null;
+
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cpfDigits = onlyDigits(cpf);
-    if (!nome.trim()) return toast.error("Informe seu nome");
-    if (cpfDigits && !isValidCPF(cpfDigits)) return toast.error("CPF inválido");
+    setNomeTouched(true);
+    setCpfTouched(true);
+    if (nomeError) {
+      toast.error(nomeError);
+      return;
+    }
+    if (cpfError) {
+      toast.error(cpfError);
+      return;
+    }
     setSavingProfile(true);
     const fullName = [nome.trim(), sobrenome.trim()].filter(Boolean).join(" ");
     const { error } = await supabase
@@ -241,7 +261,20 @@ function ContaPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="nome">Nome</Label>
-                  <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={50} />
+                  <Input
+                    id="nome"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    onBlur={() => setNomeTouched(true)}
+                    maxLength={50}
+                    aria-invalid={!!(nomeTouched && nomeError)}
+                    className={nomeTouched && nomeError ? "border-destructive focus-visible:ring-destructive" : ""}
+                  />
+                  {nomeTouched && nomeError && (
+                    <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {nomeError}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="sobrenome">Sobrenome</Label>
@@ -250,9 +283,41 @@ function ContaPage() {
               </div>
               <div>
                 <Label htmlFor="cpf">CPF</Label>
-                <Input id="cpf" value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="000.000.000-00" inputMode="numeric" />
+                <div className="relative">
+                  <Input
+                    id="cpf"
+                    value={cpf}
+                    onChange={(e) => setCpf(maskCPF(e.target.value))}
+                    onBlur={() => setCpfTouched(true)}
+                    placeholder="000.000.000-00"
+                    inputMode="numeric"
+                    maxLength={14}
+                    aria-invalid={!!(cpfTouched && cpfError)}
+                    aria-describedby="cpf-help"
+                    className={
+                      cpfTouched && cpfError
+                        ? "border-destructive focus-visible:ring-destructive pr-9"
+                        : cpfValid
+                        ? "border-green-500 focus-visible:ring-green-500 pr-9"
+                        : "pr-9"
+                    }
+                  />
+                  {cpfTouched && cpfError && (
+                    <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive pointer-events-none" />
+                  )}
+                  {cpfValid && (
+                    <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600 pointer-events-none" />
+                  )}
+                </div>
+                <p id="cpf-help" className={`text-xs mt-1 flex items-center gap-1 ${cpfTouched && cpfError ? "text-destructive" : "text-muted-foreground"}`}>
+                  {cpfTouched && cpfError ? (
+                    <><AlertCircle className="h-3 w-3" /> {cpfError}</>
+                  ) : (
+                    <>Opcional. Necessário apenas se quiser nota fiscal.</>
+                  )}
+                </p>
               </div>
-              <Button type="submit" disabled={savingProfile} className="w-full">
+              <Button type="submit" disabled={savingProfile || !!cpfError || !!nomeError} className="w-full">
                 {savingProfile && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Salvar alterações
               </Button>
