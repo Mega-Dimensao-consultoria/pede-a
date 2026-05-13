@@ -1,0 +1,189 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AdminShell } from "@/components/admin-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { fmtBRL } from "@/lib/format";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2, Upload } from "lucide-react";
+
+export const Route = createFileRoute("/admin/produtos")({ component: ProdutosAdmin });
+
+type Form = {
+  id?: string;
+  nome: string;
+  descricao: string;
+  preco_base: number;
+  category_id: string | null;
+  imagem_url: string | null;
+  ativo: boolean;
+  sizes: { label: string; price_delta: number }[];
+  addons: { nome: string; preco: number }[];
+};
+
+const empty: Form = { nome: "", descricao: "", preco_base: 0, category_id: null, imagem_url: null, ativo: true, sizes: [], addons: [] };
+
+function ProdutosAdmin() {
+  const qc = useQueryClient();
+  const { data: products = [] } = useQuery({
+    queryKey: ["admin_products"],
+    queryFn: async () => (await supabase.from("products").select("*").order("nome")).data ?? [],
+  });
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin_categories_select"],
+    queryFn: async () => (await supabase.from("categories").select("*").order("ordem")).data ?? [],
+  });
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<Form>(empty);
+  const [uploading, setUploading] = useState(false);
+
+  const startNew = () => { setForm(empty); setOpen(true); };
+  const startEdit = (p: any) => {
+    setForm({
+      id: p.id, nome: p.nome, descricao: p.descricao || "", preco_base: p.preco_base,
+      category_id: p.category_id, imagem_url: p.imagem_url, ativo: p.ativo,
+      sizes: Array.isArray(p.sizes) ? p.sizes : [], addons: Array.isArray(p.addons) ? p.addons : [],
+    });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (!form.nome.trim()) return toast.error("Nome obrigatório");
+    const payload = {
+      nome: form.nome.trim(), descricao: form.descricao || null, preco_base: form.preco_base,
+      category_id: form.category_id, imagem_url: form.imagem_url, ativo: form.ativo,
+      sizes: form.sizes as any, addons: form.addons as any,
+    };
+    const { error } = form.id
+      ? await supabase.from("products").update(payload).eq("id", form.id)
+      : await supabase.from("products").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success("Salvo"); setOpen(false); qc.invalidateQueries({ queryKey: ["admin_products"] });
+  };
+
+  const del = async (id: string) => {
+    if (!confirm("Excluir produto?")) return;
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else qc.invalidateQueries({ queryKey: ["admin_products"] });
+  };
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("products").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("products").getPublicUrl(path);
+      setForm((f) => ({ ...f, imagem_url: data.publicUrl }));
+    } catch (e: any) { toast.error(e.message); }
+    finally { setUploading(false); }
+  };
+
+  return (
+    <AdminShell>
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Produtos</h1>
+          <Button onClick={startNew}><Plus className="h-4 w-4 mr-1" /> Novo produto</Button>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {products.map((p: any) => (
+            <div key={p.id} className="bg-card border rounded-xl overflow-hidden">
+              {p.imagem_url ? <img src={p.imagem_url} alt={p.nome} className="w-full h-32 object-cover" /> : <div className="w-full h-32 bg-muted" />}
+              <div className="p-3">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <div className="font-semibold">{p.nome}</div>
+                    <div className="text-sm text-muted-foreground">{fmtBRL(p.preco_base)}</div>
+                  </div>
+                  {!p.ativo && <span className="text-xs bg-muted px-2 py-0.5 rounded">inativo</span>}
+                </div>
+                <div className="flex gap-1 mt-2">
+                  <Button size="sm" variant="outline" onClick={() => startEdit(p)}><Pencil className="h-3 w-3" /></Button>
+                  <Button size="sm" variant="outline" onClick={() => del(p.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {products.length === 0 && <div className="text-muted-foreground text-sm col-span-full text-center py-12">Nenhum produto.</div>}
+        </div>
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{form.id ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>Nome</Label><Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} /></div>
+            <div><Label>Descrição</Label><Textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Preço base</Label><Input type="number" step="0.01" value={form.preco_base} onChange={(e) => setForm({ ...form, preco_base: Number(e.target.value) })} /></div>
+              <div><Label>Categoria</Label>
+                <Select value={form.category_id ?? "none"} onValueChange={(v) => setForm({ ...form, category_id: v === "none" ? null : v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem categoria</SelectItem>
+                    {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label>Imagem</Label>
+              <div className="flex items-center gap-3">
+                {form.imagem_url && <img src={form.imagem_url} alt="" className="w-20 h-20 object-cover rounded" />}
+                <label className="cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+                  <span className="inline-flex items-center gap-2 px-3 py-2 border rounded-md text-sm hover:bg-accent"><Upload className="h-4 w-4" /> {uploading ? "Enviando..." : "Upload"}</span>
+                </label>
+                {form.imagem_url && <Button size="sm" variant="ghost" onClick={() => setForm({ ...form, imagem_url: null })}>Remover</Button>}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1"><Label>Tamanhos</Label>
+                <Button size="sm" variant="outline" onClick={() => setForm({ ...form, sizes: [...form.sizes, { label: "", price_delta: 0 }] })}><Plus className="h-3 w-3" /></Button>
+              </div>
+              {form.sizes.map((s, i) => (
+                <div key={i} className="flex gap-2 mb-1">
+                  <Input placeholder="Ex: Grande" value={s.label} onChange={(e) => { const arr = [...form.sizes]; arr[i] = { ...arr[i], label: e.target.value }; setForm({ ...form, sizes: arr }); }} />
+                  <Input type="number" step="0.01" placeholder="+R$" className="w-28" value={s.price_delta} onChange={(e) => { const arr = [...form.sizes]; arr[i] = { ...arr[i], price_delta: Number(e.target.value) }; setForm({ ...form, sizes: arr }); }} />
+                  <Button size="icon" variant="ghost" onClick={() => setForm({ ...form, sizes: form.sizes.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1"><Label>Adicionais</Label>
+                <Button size="sm" variant="outline" onClick={() => setForm({ ...form, addons: [...form.addons, { nome: "", preco: 0 }] })}><Plus className="h-3 w-3" /></Button>
+              </div>
+              {form.addons.map((a, i) => (
+                <div key={i} className="flex gap-2 mb-1">
+                  <Input placeholder="Ex: Bacon" value={a.nome} onChange={(e) => { const arr = [...form.addons]; arr[i] = { ...arr[i], nome: e.target.value }; setForm({ ...form, addons: arr }); }} />
+                  <Input type="number" step="0.01" placeholder="R$" className="w-28" value={a.preco} onChange={(e) => { const arr = [...form.addons]; arr[i] = { ...arr[i], preco: Number(e.target.value) }; setForm({ ...form, addons: arr }); }} />
+                  <Button size="icon" variant="ghost" onClick={() => setForm({ ...form, addons: form.addons.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              ))}
+            </div>
+
+            <label className="flex items-center gap-2"><Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} /> Ativo</label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={save}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AdminShell>
+  );
+}
