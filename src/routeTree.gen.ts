@@ -21,6 +21,7 @@ import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin/configuracoes'
 import { Route as AdminCategoriasRouteImport } from './routes/admin/categorias'
 import { Route as AdminBairrosRouteImport } from './routes/admin/bairros'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
@@ -82,6 +83,12 @@ const AdminBairrosRoute = AdminBairrosRouteImport.update({
   path: '/admin/bairros',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/admin/produtos': typeof AdminProdutosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/admin/produtos': typeof AdminProdutosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/admin/produtos': typeof AdminProdutosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/produto/$id'
     | '/sucesso/$orderId'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/produto/$id'
     | '/sucesso/$orderId'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/produto/$id'
     | '/sucesso/$orderId'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +197,7 @@ export interface RootRouteChildren {
   AdminProdutosRoute: typeof AdminProdutosRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   SucessoOrderIdRoute: typeof SucessoOrderIdRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBairrosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +309,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProdutosRoute: AdminProdutosRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   SucessoOrderIdRoute: SucessoOrderIdRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
