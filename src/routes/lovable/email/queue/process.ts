@@ -1,6 +1,8 @@
 import { sendLovableEmail } from '@lovable.dev/email-js'
-import { createClient } from '@supabase/supabase-js'
+import { createClient as _createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+
+const createClient: (url: string, key: string) => any = _createClient as any
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -37,7 +39,7 @@ function getRetryAfterSeconds(error: unknown): number {
 
 // Move a message to the dead letter queue and log the reason.
 async function moveToDlq(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   queue: string,
   msg: { msg_id: number; message: Record<string, unknown> },
   reason: string
