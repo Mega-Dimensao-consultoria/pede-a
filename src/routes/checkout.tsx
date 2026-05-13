@@ -10,9 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BR_STATES } from "@/lib/br-states";
 import { fmtBRL, isValidCPF, maskCEP, maskCPF, onlyDigits } from "@/lib/format";
 import { toast } from "sonner";
-import { Copy, MapPin, Store, CreditCard, QrCode, Loader2 } from "lucide-react";
+import { Copy, MapPin, Store, CreditCard, QrCode, Loader2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -31,13 +33,28 @@ function Checkout() {
     queryKey: ["store_config"],
     queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data,
   });
+  const { data: savedAddresses = [], refetch: reloadAddresses } = useQuery({
+    queryKey: ["my_addresses", user?.id],
+    enabled: !!user,
+    queryFn: async () =>
+      (await supabase
+        .from("user_addresses" as any)
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: true })).data ?? [],
+  });
 
   const [tipo, setTipo] = useState<"entrega" | "retirada">("entrega");
   const [bairroId, setBairroId] = useState<string>("");
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [addingNew, setAddingNew] = useState(false);
+  const [saveNew, setSaveNew] = useState(true);
   const [cep, setCep] = useState("");
   const [rua, setRua] = useState("");
   const [numero, setNumero] = useState("");
   const [complemento, setComplemento] = useState("");
+  const [bairroNome, setBairroNome] = useState("");
   const [cidade, setCidade] = useState("");
   const [uf, setUf] = useState("");
   const [cepBusy, setCepBusy] = useState(false);
@@ -54,6 +71,19 @@ function Checkout() {
     if (items.length === 0) navigate({ to: "/carrinho" });
   }, [items.length, navigate]);
 
+  // Auto-select default saved address
+  useEffect(() => {
+    if (!selectedAddressId && savedAddresses.length > 0 && !addingNew) {
+      const def = (savedAddresses as any[]).find((a) => a.is_default) ?? savedAddresses[0];
+      setSelectedAddressId(def.id);
+    }
+    if (savedAddresses.length === 0 && !addingNew) {
+      setAddingNew(true);
+    }
+  }, [savedAddresses, selectedAddressId, addingNew]);
+
+  const selectedAddress = (savedAddresses as any[]).find((a) => a.id === selectedAddressId);
+
   const buscarCep = async () => {
     const d = onlyDigits(cep);
     if (d.length !== 8) return;
@@ -63,6 +93,7 @@ function Checkout() {
       const j = await r.json();
       if (j.erro) { toast.error("CEP não encontrado"); return; }
       setRua(j.logradouro || "");
+      setBairroNome(j.bairro || "");
       setCidade(j.localidade || "");
       setUf(j.uf || "");
     } catch {
@@ -72,9 +103,37 @@ function Checkout() {
 
   const finalizar = async () => {
     if (!user) return;
+    let enderecoPayload: any = null;
     if (tipo === "entrega") {
       if (!bairroId) return toast.error("Selecione um bairro");
-      if (!rua || !numero) return toast.error("Preencha o endereço");
+      if (addingNew || !selectedAddress) {
+        if (!rua || !numero) return toast.error("Preencha o endereço");
+        enderecoPayload = { cep: onlyDigits(cep), rua, numero, complemento, bairro: bairroNome, cidade, uf };
+        if (saveNew) {
+          await supabase.from("user_addresses" as any).insert({
+            user_id: user.id,
+            rotulo: "Endereço",
+            cep: onlyDigits(cep) || null,
+            rua, numero,
+            complemento: complemento || null,
+            bairro: bairroNome || null,
+            cidade: cidade || null,
+            estado: uf || null,
+            is_default: savedAddresses.length === 0,
+          });
+          reloadAddresses();
+        }
+      } else {
+        enderecoPayload = {
+          cep: selectedAddress.cep,
+          rua: selectedAddress.rua,
+          numero: selectedAddress.numero,
+          complemento: selectedAddress.complemento,
+          bairro: selectedAddress.bairro,
+          cidade: selectedAddress.cidade,
+          uf: selectedAddress.estado,
+        };
+      }
     }
     if (emitirNF && !isValidCPF(cpf)) return toast.error("CPF inválido");
 
@@ -103,7 +162,7 @@ function Checkout() {
           tipo,
           bairro_id: tipo === "entrega" ? bairroId : null,
           bairro_nome: tipo === "entrega" ? bairro?.nome : null,
-          endereco: tipo === "entrega" ? { cep, rua, numero, complemento, cidade, uf } : null,
+          endereco: enderecoPayload,
           pagamento,
           cpf_nota: emitirNF ? onlyDigits(cpf) : null,
         })
@@ -163,22 +222,73 @@ function Checkout() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="font-semibold">Endereço</h2>
-              <div className="flex gap-2">
-                <Input placeholder="CEP" value={cep} onChange={(e) => setCep(maskCEP(e.target.value))} onBlur={buscarCep} />
-                <Button type="button" variant="outline" onClick={buscarCep} disabled={cepBusy}>
-                  {cepBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Buscar"}
-                </Button>
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold">Endereço de entrega</h2>
+                {savedAddresses.length > 0 && !addingNew && (
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setAddingNew(true); setSelectedAddressId(""); }}>
+                    <Plus className="h-4 w-4 mr-1" /> Novo
+                  </Button>
+                )}
+                {savedAddresses.length > 0 && addingNew && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setAddingNew(false)}>
+                    Usar salvo
+                  </Button>
+                )}
               </div>
-              <Input placeholder="Rua" value={rua} onChange={(e) => setRua(e.target.value)} />
-              <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Número" value={numero} onChange={(e) => setNumero(e.target.value)} />
-                <Input placeholder="Complemento" value={complemento} onChange={(e) => setComplemento(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Input className="col-span-2" placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} />
-                <Input placeholder="UF" value={uf} maxLength={2} onChange={(e) => setUf(e.target.value.toUpperCase())} />
-              </div>
+
+              {!addingNew && savedAddresses.length > 0 && (
+                <div className="grid gap-2">
+                  {(savedAddresses as any[]).map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => setSelectedAddressId(a.id)}
+                      className={`text-left border rounded-lg p-3 ${selectedAddressId === a.id ? "border-primary bg-accent" : ""}`}
+                    >
+                      <div className="font-medium text-sm">{a.rotulo || "Endereço"}{a.is_default && <span className="ml-2 text-xs text-muted-foreground">(padrão)</span>}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {a.rua}, {a.numero}{a.complemento ? ` - ${a.complemento}` : ""} • {[a.bairro, a.cidade, a.estado].filter(Boolean).join(" - ")}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {addingNew && (
+                <div className="space-y-3">
+                  <div>
+                    <Label>CEP</Label>
+                    <div className="flex gap-2">
+                      <Input placeholder="00000-000" value={cep} onChange={(e) => setCep(maskCEP(e.target.value))} onBlur={buscarCep} inputMode="numeric" />
+                      <Button type="button" variant="outline" onClick={buscarCep} disabled={cepBusy}>
+                        {cepBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Buscar"}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2"><Label>Endereço</Label><Input value={rua} onChange={(e) => setRua(e.target.value)} /></div>
+                    <div><Label>Número</Label><Input value={numero} onChange={(e) => setNumero(e.target.value)} /></div>
+                  </div>
+                  <div><Label>Complemento</Label><Input value={complemento} onChange={(e) => setComplemento(e.target.value)} /></div>
+                  <div><Label>Bairro</Label><Input value={bairroNome} onChange={(e) => setBairroNome(e.target.value)} /></div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2"><Label>Cidade</Label><Input value={cidade} onChange={(e) => setCidade(e.target.value)} /></div>
+                    <div>
+                      <Label>UF</Label>
+                      <Select value={uf} onValueChange={setUf}>
+                        <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                        <SelectContent>
+                          {BR_STATES.map((s) => (<SelectItem key={s.uf} value={s.uf}>{s.uf}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" checked={saveNew} onChange={(e) => setSaveNew(e.target.checked)} />
+                    Salvar este endereço na minha conta
+                  </label>
+                </div>
+              )}
             </section>
           </>
         )}

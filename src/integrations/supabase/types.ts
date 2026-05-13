@@ -265,38 +265,59 @@ export type Database = {
       }
       store_config: {
         Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
           cnpj: string | null
+          complemento: string | null
           endereco: string | null
           horarios: Json
           id: string
           nome: string
+          numero: string | null
           pix_key: string | null
           pix_qr_url: string | null
+          rua: string | null
           telefone: string | null
+          uf: string | null
           updated_at: string
           whatsapp: string | null
         }
         Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
           cnpj?: string | null
+          complemento?: string | null
           endereco?: string | null
           horarios?: Json
           id?: string
           nome?: string
+          numero?: string | null
           pix_key?: string | null
           pix_qr_url?: string | null
+          rua?: string | null
           telefone?: string | null
+          uf?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
         Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
           cnpj?: string | null
+          complemento?: string | null
           endereco?: string | null
           horarios?: Json
           id?: string
           nome?: string
+          numero?: string | null
           pix_key?: string | null
           pix_qr_url?: string | null
+          rua?: string | null
           telefone?: string | null
+          uf?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
