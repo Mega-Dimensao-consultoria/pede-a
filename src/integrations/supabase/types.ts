@@ -198,6 +198,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          approved_at: string | null
           bairro_id: string | null
           bairro_nome: string | null
           cliente_nome: string | null
@@ -209,6 +210,9 @@ export type Database = {
           items: Json
           numero: number
           pagamento: Database["public"]["Enums"]["payment_method"]
+          payment_proof_deleted_at: string | null
+          payment_proof_path: string | null
+          payment_proof_uploaded_at: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           taxa_entrega: number
@@ -218,6 +222,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
           bairro_id?: string | null
           bairro_nome?: string | null
           cliente_nome?: string | null
@@ -229,6 +234,9 @@ export type Database = {
           items?: Json
           numero?: number
           pagamento?: Database["public"]["Enums"]["payment_method"]
+          payment_proof_deleted_at?: string | null
+          payment_proof_path?: string | null
+          payment_proof_uploaded_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           taxa_entrega?: number
@@ -238,6 +246,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved_at?: string | null
           bairro_id?: string | null
           bairro_nome?: string | null
           cliente_nome?: string | null
@@ -249,6 +258,9 @@ export type Database = {
           items?: Json
           numero?: number
           pagamento?: Database["public"]["Enums"]["payment_method"]
+          payment_proof_deleted_at?: string | null
+          payment_proof_path?: string | null
+          payment_proof_uploaded_at?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           taxa_entrega?: number
@@ -511,6 +523,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_payment_proofs: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -549,6 +562,7 @@ export type Database = {
       identifier_type: "email" | "whatsapp"
       order_status:
         | "pendente"
+        | "aprovado"
         | "preparando"
         | "saiu"
         | "concluido"
@@ -686,6 +700,7 @@ export const Constants = {
       identifier_type: ["email", "whatsapp"],
       order_status: [
         "pendente",
+        "aprovado",
         "preparando",
         "saiu",
         "concluido",
