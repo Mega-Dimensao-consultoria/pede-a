@@ -44,12 +44,6 @@ export function buildPixPayload({ pixKey, merchantName, merchantCity, amount, tx
   const safeTxid = sanitize(txid || "***", 25).replace(/\s/g, "") || "***";
   const additional = tlv("62", tlv("05", safeTxid));
 
-  const payloadNoCrc =
-    tlv("00", "01") +
-    tlv("26", gui + key + desc).slice(0) + // merchantAccountInfo already built; replace
-    "";
-
-  // Build properly
   const parts =
     tlv("00", "01") +
     merchantAccountInfo +
@@ -62,6 +56,5 @@ export function buildPixPayload({ pixKey, merchantName, merchantCity, amount, tx
     additional +
     "6304";
 
-  void payloadNoCrc;
   return parts + crc16(parts);
 }
