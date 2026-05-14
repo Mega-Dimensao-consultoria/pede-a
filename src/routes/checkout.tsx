@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BR_STATES } from "@/lib/br-states";
 import { fmtBRL, isValidCPF, maskCEP, maskCPF, onlyDigits } from "@/lib/format";
 import { toast } from "sonner";
-import { Copy, MapPin, Store, CreditCard, QrCode, Loader2, Plus } from "lucide-react";
+import { MapPin, Store, CreditCard, QrCode, Loader2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -189,13 +189,6 @@ function Checkout() {
     } catch (e: any) {
       toast.error(e.message || "Erro ao finalizar");
     } finally { setBusy(false); }
-  };
-
-  const copyPix = () => {
-    if (store?.pix_key) {
-      navigator.clipboard.writeText(store.pix_key);
-      toast.success("Chave PIX copiada");
-    }
   };
 
   return (
