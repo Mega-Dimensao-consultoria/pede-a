@@ -62,14 +62,15 @@ function Checkout() {
   const [cpf, setCpf] = useState(profile?.cpf || "");
   const [pagamento, setPagamento] = useState<"cartao" | "pix">("pix");
   const [busy, setBusy] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const bairro = bairros.find((b: any) => b.id === bairroId);
   const taxa = tipo === "entrega" ? Number(bairro?.taxa ?? 0) : 0;
   const total = subtotal + taxa;
 
   useEffect(() => {
-    if (items.length === 0) navigate({ to: "/carrinho" });
-  }, [items.length, navigate]);
+    if (items.length === 0 && !submitted && !busy) navigate({ to: "/carrinho" });
+  }, [items.length, navigate, submitted, busy]);
 
   // Auto-select default saved address
   useEffect(() => {
@@ -184,8 +185,10 @@ function Checkout() {
         .single();
 
       if (error) throw error;
-      await clear();
+      setSubmitted(true);
       navigate({ to: "/sucesso/$orderId", params: { orderId: (data as any).id } });
+      // limpa o carrinho depois de navegar para não acionar o redirect do useEffect
+      clear().catch(() => {});
     } catch (e: any) {
       toast.error(e.message || "Erro ao finalizar");
     } finally { setBusy(false); }
