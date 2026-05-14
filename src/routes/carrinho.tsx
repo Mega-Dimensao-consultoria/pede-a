@@ -17,9 +17,9 @@ function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: store } = useQuery({
+  const { data: store } = useQuery<any>({
     queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public" as any).select("*").maybeSingle()).data,
+    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
   });
   const open = isStoreOpen((store?.horarios as Horarios) || null);
 
