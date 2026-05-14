@@ -520,7 +520,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      store_config_public: {
+        Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          endereco: string | null
+          horarios: Json | null
+          id: string | null
+          nome: string | null
+          numero: string | null
+          pix_qr_url: string | null
+          rua: string | null
+          telefone: string | null
+          uf: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          endereco?: string | null
+          horarios?: Json | null
+          id?: string | null
+          nome?: string | null
+          numero?: string | null
+          pix_qr_url?: string | null
+          rua?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          endereco?: string | null
+          horarios?: Json | null
+          id?: string | null
+          nome?: string | null
+          numero?: string | null
+          pix_qr_url?: string | null
+          rua?: string | null
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_old_payment_proofs: { Args: never; Returns: undefined }
@@ -531,6 +584,14 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_pix_payment_info: {
+        Args: { _order_id: string }
+        Returns: {
+          merchant_city: string
+          merchant_name: string
+          pix_key: string
+        }[]
       }
       has_role: {
         Args: {
