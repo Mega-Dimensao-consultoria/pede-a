@@ -9,7 +9,7 @@ import { fmtBRL } from "@/lib/format";
 
 type Props = {
   order: any;
-  store: any;
+  store?: any;
   onUploaded?: () => void;
 };
 
@@ -19,20 +19,35 @@ export function PixPayment({ order, store, onUploaded }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploaded, setUploaded] = useState<boolean>(!!order?.payment_proof_path);
+  const [pixInfo, setPixInfo] = useState<{ pix_key: string; merchant_name: string; merchant_city: string } | null>(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
 
   useEffect(() => {
-    if (!store?.pix_key) return;
+    let cancelled = false;
+    setLoadingInfo(true);
+    supabase.rpc("get_pix_payment_info" as any, { _order_id: order.id }).then(({ data, error }) => {
+      if (cancelled) return;
+      setLoadingInfo(false);
+      if (error || !data || (Array.isArray(data) && data.length === 0)) return;
+      const row = Array.isArray(data) ? data[0] : data;
+      setPixInfo(row);
+    });
+    return () => { cancelled = true; };
+  }, [order.id]);
+
+  useEffect(() => {
+    if (!pixInfo?.pix_key) return;
     const p = buildPixPayload({
-      pixKey: store.pix_key,
-      merchantName: store.nome || "RECEBEDOR",
-      merchantCity: store.cidade || "BRASIL",
+      pixKey: pixInfo.pix_key,
+      merchantName: pixInfo.merchant_name || "RECEBEDOR",
+      merchantCity: pixInfo.merchant_city || "BRASIL",
       amount: Number(order.total),
       txid: `PEDIDO${order.numero}`,
       description: `Pedido ${order.numero}`,
     });
     setPayload(p);
     QRCode.toDataURL(p, { width: 280, margin: 1 }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
-  }, [order, store]);
+  }, [order, pixInfo]);
 
   const copy = () => {
     if (!payload) return;
@@ -64,7 +79,10 @@ export function PixPayment({ order, store, onUploaded }: Props) {
     }
   };
 
-  if (!store?.pix_key) {
+  if (loadingInfo) {
+    return <div className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Carregando PIX…</div>;
+  }
+  if (!pixInfo?.pix_key) {
     return <div className="text-sm text-muted-foreground">Chave PIX não configurada pela loja.</div>;
   }
 
