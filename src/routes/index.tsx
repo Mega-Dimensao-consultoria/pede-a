@@ -17,7 +17,7 @@ function Index() {
 
   const { data: store } = useQuery({
     queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data,
+    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
   });
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
