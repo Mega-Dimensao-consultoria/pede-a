@@ -6,12 +6,13 @@ import { fmtBRL } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, MessageCircle, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { PixPayment } from "@/components/pix-payment";
 
 export const Route = createFileRoute("/sucesso/$orderId")({ component: Sucesso });
 
 function Sucesso() {
   const { orderId } = Route.useParams();
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading, refetch } = useQuery({
     queryKey: ["order", orderId],
     queryFn: async () => (await supabase.from("orders").select("*").eq("id", orderId).maybeSingle()).data,
   });
@@ -52,16 +53,8 @@ function Sucesso() {
           <p className="text-muted-foreground">Número <strong>#{order.numero}</strong></p>
         </div>
 
-        {order.pagamento === "pix" && store?.pix_key && (
-          <div className="bg-card border rounded-xl p-4 space-y-2">
-            <h2 className="font-semibold">Pague com PIX</h2>
-            {store.pix_qr_url && <img src={store.pix_qr_url} alt="QR Code PIX" className="w-48 h-48 mx-auto" />}
-            <div className="text-sm">Chave PIX:</div>
-            <div className="flex gap-2">
-              <code className="flex-1 bg-muted px-3 py-2 rounded text-sm break-all">{store.pix_key}</code>
-              <Button size="icon" variant="outline" onClick={() => { navigator.clipboard.writeText(store.pix_key!); toast.success("Chave copiada"); }}><Copy className="h-4 w-4" /></Button>
-            </div>
-          </div>
+        {order.pagamento === "pix" && (
+          <PixPayment order={order} store={store} onUploaded={() => refetch()} />
         )}
 
         <div className="bg-card border rounded-xl p-4 space-y-2">
