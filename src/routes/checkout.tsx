@@ -329,17 +329,8 @@ function Checkout() {
           </RadioGroup>
 
           {pagamento === "pix" && (
-            <div className="mt-3 border rounded-lg p-4 bg-card text-center space-y-3">
-              {store?.pix_qr_url ? (
-                <img src={store.pix_qr_url} alt="QR PIX" className="mx-auto h-44 w-44 object-contain" />
-              ) : (
-                <div className="h-44 w-44 mx-auto bg-muted rounded-lg flex items-center justify-center text-muted-foreground"><QrCode className="h-16 w-16" /></div>
-              )}
-              <div className="text-sm">Chave PIX</div>
-              <div className="flex items-center gap-2 justify-center">
-                <code className="text-xs bg-muted px-2 py-1 rounded">{store?.pix_key || "—"}</code>
-                <Button size="sm" variant="outline" onClick={copyPix}><Copy className="h-3 w-3" /></Button>
-              </div>
+            <div className="mt-3 border rounded-lg p-4 bg-card text-center text-sm text-muted-foreground">
+              O QR Code e o código PIX serão exibidos após confirmar o pedido.
             </div>
           )}
         </section>
