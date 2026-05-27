@@ -87,8 +87,8 @@ function Index() {
               className="bg-card rounded-xl overflow-hidden border hover:shadow-md transition active:scale-95"
             >
               <div className="aspect-square bg-muted overflow-hidden">
-                {p.imagem_url ? (
-                  <img src={p.imagem_url} alt={p.nome} className="w-full h-full object-cover" />
+                {(p.imagens?.[0] ?? p.imagem_url) ? (
+                  <img src={p.imagens?.[0] ?? p.imagem_url} alt={p.nome} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     <UtensilsCrossed className="h-10 w-10" />

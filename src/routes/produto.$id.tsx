@@ -32,7 +32,10 @@ function ProductPage() {
   });
 
   const sizes = (p?.sizes as Array<{ label: string; price_delta: number }>) ?? [];
-  const addons = (p?.addons as Array<{ nome: string; preco: number }>) ?? [];
+  const addons = (p?.addons as Array<{ nome: string; preco: number; imagem_url?: string | null }>) ?? [];
+  const imagens: string[] = (Array.isArray((p as any)?.imagens) && (p as any).imagens.length)
+    ? (p as any).imagens
+    : p?.imagem_url ? [p.imagem_url] : [];
   const [size, setSize] = useState<string>("");
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [qty, setQty] = useState(1);
@@ -79,15 +82,29 @@ function ProductPage() {
         <button onClick={() => navigate({ to: "/" })} className="absolute top-3 left-3 z-10 bg-card/90 backdrop-blur rounded-full p-2 shadow">
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <div className="aspect-video bg-muted">
-          {p.imagem_url ? (
-            <img src={p.imagem_url} alt={p.nome} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <UtensilsCrossed className="h-16 w-16" />
-            </div>
-          )}
-        </div>
+        {imagens.length > 0 ? (
+          <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
+            {imagens.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`${p.nome} ${i + 1}`}
+                className="w-full shrink-0 snap-center aspect-video object-cover bg-muted"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="aspect-video bg-muted flex items-center justify-center text-muted-foreground">
+            <UtensilsCrossed className="h-16 w-16" />
+          </div>
+        )}
+        {imagens.length > 1 && (
+          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+            {imagens.map((_, i) => (
+              <span key={i} className="h-1.5 w-1.5 rounded-full bg-card/80 shadow" />
+            ))}
+          </div>
+        )}
       </div>
       <div className="max-w-2xl mx-auto p-4 space-y-5">
         <div>
@@ -119,6 +136,9 @@ function ProductPage() {
                 <Label key={a.nome} className="flex items-center justify-between border rounded-lg p-3 cursor-pointer">
                   <div className="flex items-center gap-3">
                     <Checkbox checked={!!picked[a.nome]} onCheckedChange={(v) => setPicked({ ...picked, [a.nome]: !!v })} />
+                    {a.imagem_url && (
+                      <img src={a.imagem_url} alt={a.nome} className="w-10 h-10 rounded object-cover" />
+                    )}
                     <span>{a.nome}</span>
                   </div>
                   <span className="text-sm font-medium">+ {fmtBRL(a.preco)}</span>
