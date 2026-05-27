@@ -41,7 +41,7 @@ function RecuperarPage() {
       await hydrateFromItems(items, row.email)
       setStatus('done')
       if (user) navigate({ to: '/checkout' })
-      else navigate({ to: '/auth', search: { redirect: '/checkout' } as any })
+      else navigate({ to: '/carrinho' })
     })()
     return () => { cancelled = true }
   }, [token, authLoading, user, hydrateFromItems, navigate])
