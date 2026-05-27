@@ -169,6 +169,48 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_carts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          items: Json
+          last_email_sent_at: string | null
+          recovered_at: string | null
+          recovery_sent_count: number
+          status: string
+          subtotal: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          items?: Json
+          last_email_sent_at?: string | null
+          recovered_at?: string | null
+          recovery_sent_count?: number
+          status?: string
+          subtotal?: number
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          items?: Json
+          last_email_sent_at?: string | null
+          recovered_at?: string | null
+          recovery_sent_count?: number
+          status?: string
+          subtotal?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       neighborhood_delivery: {
         Row: {
           ativo: boolean
@@ -595,6 +637,28 @@ export type Database = {
           merchant_name: string
           pix_key: string
         }[]
+      }
+      guest_cart_get: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          items: Json
+          status: string
+          subtotal: number
+        }[]
+      }
+      guest_cart_mark_recovered: {
+        Args: { _token: string }
+        Returns: undefined
+      }
+      guest_cart_upsert: {
+        Args: {
+          _email: string
+          _items: Json
+          _subtotal: number
+          _token: string
+        }
+        Returns: undefined
       }
       has_role: {
         Args: {

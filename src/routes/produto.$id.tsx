@@ -50,10 +50,9 @@ function ProductPage() {
       toast.error("Escolha um tamanho");
       return;
     }
-    if (!user) {
-      setAuthOpen(true);
-      return;
-    }
+    // Se nem logado nem guest, o `add` lança "guest_email_required" e
+    // abrimos o modal (que aceita continuar só com e-mail). Após sucesso,
+    // o onSuccess do modal chama reAdd().
     try {
       await add({
         product_id: id,
@@ -62,10 +61,15 @@ function ProductPage() {
         quantidade: qty,
         observacoes: obs || null,
         preco_unit: unit,
+        product: { nome: p?.nome ?? "", imagem_url: (imagens[0] ?? p?.imagem_url) ?? null },
       });
       toast.success("Adicionado ao cesto");
       navigate({ to: "/" });
     } catch (e: any) {
+      if (e?.message === "guest_email_required") {
+        setAuthOpen(true);
+        return;
+      }
       toast.error(e.message || "Erro");
     }
   };
