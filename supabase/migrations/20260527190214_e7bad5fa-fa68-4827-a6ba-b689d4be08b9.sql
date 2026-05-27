@@ -1,0 +1,2 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS imagens text[] NOT NULL DEFAULT '{}'::text[];
+UPDATE public.products SET imagens = ARRAY[imagem_url] WHERE (imagens IS NULL OR array_length(imagens,1) IS NULL) AND imagem_url IS NOT NULL;

@@ -288,6 +288,7 @@ export type Database = {
           descricao: string | null
           id: string
           imagem_url: string | null
+          imagens: string[]
           nome: string
           preco_base: number
           sizes: Json
@@ -301,6 +302,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           imagem_url?: string | null
+          imagens?: string[]
           nome: string
           preco_base?: number
           sizes?: Json
@@ -314,6 +316,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           imagem_url?: string | null
+          imagens?: string[]
           nome?: string
           preco_base?: number
           sizes?: Json
