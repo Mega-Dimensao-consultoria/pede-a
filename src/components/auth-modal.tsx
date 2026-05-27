@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { maskPhone, onlyDigits } from "@/lib/format";
-import { Mail, MessageCircle, Loader2 } from "lucide-react";
+import { Mail, MessageCircle, Loader2, UserPlus } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 
 const wppEmail = (wpp: string) => `${onlyDigits(wpp)}@whatsapp.pedeai.local`;
 
@@ -31,7 +32,7 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; onOpenChange: (v: boolean) => void; onSuccess?: () => void }) {
+export function AuthModal({ open, onOpenChange, onSuccess, allowGuest = true }: { open: boolean; onOpenChange: (v: boolean) => void; onSuccess?: () => void; allowGuest?: boolean }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [identifier, setIdentifier] = useState<"email" | "whatsapp">("email");
   const [email, setEmail] = useState("");
@@ -40,6 +41,24 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
   const [senha, setSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [oauthBusy, setOauthBusy] = useState<"google" | "apple" | null>(null);
+  const [guestMode, setGuestMode] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
+  const { setGuest } = useCart();
+
+  const submitGuest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await setGuest(guestEmail);
+      toast.success("Tudo certo! Você já pode continuar comprando.");
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (err: any) {
+      toast.error(err.message || "E-mail inválido");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const signInOAuth = async (provider: "google" | "apple") => {
     setOauthBusy(provider);
@@ -109,8 +128,29 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Entre para continuar</DialogTitle>
-          <DialogDescription>Acesse sua conta para salvar o carrinho.</DialogDescription>
+          <DialogDescription>
+            {allowGuest ? "Crie uma conta, entre ou continue só com o seu e-mail." : "Acesse sua conta para finalizar o pedido."}
+          </DialogDescription>
         </DialogHeader>
+        {allowGuest && guestMode ? (
+          <form onSubmit={submitGuest} className="space-y-3">
+            <div>
+              <Label htmlFor="guest-email">Seu e-mail</Label>
+              <Input id="guest-email" type="email" required value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="voce@exemplo.com" />
+              <p className="text-xs text-muted-foreground mt-1">
+                Usamos seu e-mail apenas para enviar o link do seu pedido caso você esqueça itens no cesto.
+              </p>
+            </div>
+            <Button type="submit" className="w-full" disabled={busy}>
+              {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Continuar comprando
+            </Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setGuestMode(false)}>
+              Voltar
+            </Button>
+          </form>
+        ) : (
+          <>
         <div className="space-y-2">
           <Button type="button" variant="outline" className="w-full gap-2" onClick={() => signInOAuth("google")} disabled={!!oauthBusy}>
             {oauthBusy === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon className="h-4 w-4" />}
@@ -120,6 +160,11 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
             {oauthBusy === "apple" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AppleIcon className="h-4 w-4" />}
             Continuar com Apple
           </Button>
+          {allowGuest && (
+            <Button type="button" variant="secondary" className="w-full gap-2" onClick={() => setGuestMode(true)}>
+              <UserPlus className="h-4 w-4" /> Continuar sem cadastro
+            </Button>
+          )}
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
             <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ou</span></div>
@@ -168,6 +213,8 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
             </form>
           </TabsContent>
         </Tabs>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
