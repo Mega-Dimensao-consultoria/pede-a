@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
@@ -28,7 +29,13 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicHooksCartRecoveryRouteImport } from './routes/api/public/hooks/cart-recovery'
 
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
@@ -127,6 +134,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksCartRecoveryRoute =
+  ApiPublicHooksCartRecoveryRouteImport.update({
+    id: '/api/public/hooks/cart-recovery',
+    path: '/api/public/hooks/cart-recovery',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -134,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/recuperar': typeof RecuperarRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -143,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/cart-recovery': typeof ApiPublicHooksCartRecoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -155,6 +170,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/recuperar': typeof RecuperarRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -164,6 +180,7 @@ export interface FileRoutesByTo {
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/cart-recovery': typeof ApiPublicHooksCartRecoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -177,6 +194,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/recuperar': typeof RecuperarRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -186,6 +204,7 @@ export interface FileRoutesById {
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/cart-recovery': typeof ApiPublicHooksCartRecoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -200,6 +219,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/recuperar'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -209,6 +229,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/cart-recovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -221,6 +242,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/recuperar'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -230,6 +252,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/cart-recovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -242,6 +265,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/recuperar'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -251,6 +275,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/cart-recovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -264,6 +289,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
   ContaRoute: typeof ContaRoute
+  RecuperarRoute: typeof RecuperarRoute
   AdminBairrosRoute: typeof AdminBairrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
@@ -273,6 +299,7 @@ export interface RootRouteChildren {
   ProdutoIdRoute: typeof ProdutoIdRoute
   SucessoOrderIdRoute: typeof SucessoOrderIdRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksCartRecoveryRoute: typeof ApiPublicHooksCartRecoveryRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -282,6 +309,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conta': {
       id: '/conta'
       path: '/conta'
@@ -415,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/cart-recovery': {
+      id: '/api/public/hooks/cart-recovery'
+      path: '/api/public/hooks/cart-recovery'
+      fullPath: '/api/public/hooks/cart-recovery'
+      preLoaderRoute: typeof ApiPublicHooksCartRecoveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -424,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
   ContaRoute: ContaRoute,
+  RecuperarRoute: RecuperarRoute,
   AdminBairrosRoute: AdminBairrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
@@ -433,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProdutoIdRoute: ProdutoIdRoute,
   SucessoOrderIdRoute: SucessoOrderIdRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksCartRecoveryRoute: ApiPublicHooksCartRecoveryRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

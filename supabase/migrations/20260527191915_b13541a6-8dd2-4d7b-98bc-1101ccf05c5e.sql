@@ -1,0 +1,1 @@
+GRANT UPDATE ON public.guest_carts TO service_role;
