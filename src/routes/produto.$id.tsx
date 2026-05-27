@@ -50,11 +50,9 @@ function ProductPage() {
       toast.error("Escolha um tamanho");
       return;
     }
-    // Se não estiver logado nem cadastrado como guest, abrimos o modal
-    // (que permite continuar só com e-mail). Após o e-mail, o onSuccess
-    // chama reAdd() para concluir a adição.
-    const { useCart } = await import("@/hooks/useCart");
-    void useCart;
+    // Se nem logado nem guest, o `add` lança "guest_email_required" e
+    // abrimos o modal (que aceita continuar só com e-mail). Após sucesso,
+    // o onSuccess do modal chama reAdd().
     try {
       await add({
         product_id: id,
