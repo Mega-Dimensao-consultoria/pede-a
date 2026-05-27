@@ -50,10 +50,11 @@ function ProductPage() {
       toast.error("Escolha um tamanho");
       return;
     }
-    if (!user) {
-      setAuthOpen(true);
-      return;
-    }
+    // Se não estiver logado nem cadastrado como guest, abrimos o modal
+    // (que permite continuar só com e-mail). Após o e-mail, o onSuccess
+    // chama reAdd() para concluir a adição.
+    const { useCart } = await import("@/hooks/useCart");
+    void useCart;
     try {
       await add({
         product_id: id,
@@ -62,10 +63,15 @@ function ProductPage() {
         quantidade: qty,
         observacoes: obs || null,
         preco_unit: unit,
+        product: { nome: p?.nome ?? "", imagem_url: (imagens[0] ?? p?.imagem_url) ?? null },
       });
       toast.success("Adicionado ao cesto");
       navigate({ to: "/" });
     } catch (e: any) {
+      if (e?.message === "guest_email_required") {
+        setAuthOpen(true);
+        return;
+      }
       toast.error(e.message || "Erro");
     }
   };
