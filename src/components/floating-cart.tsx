@@ -3,6 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ShoppingBag, Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthModal } from "@/components/auth-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { isStoreOpen, type Horarios } from "@/lib/store-status";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,9 @@ import { fmtBRL } from "@/lib/format";
 
 export function FloatingCart() {
   const { items, count, subtotal, updateQty, remove } = useCart();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const navigate = useNavigate();
 
   const { data: store } = useQuery<any>({
@@ -23,6 +27,10 @@ export function FloatingCart() {
 
   const goCheckout = () => {
     setOpen(false);
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
     navigate({ to: "/checkout" });
   };
 
@@ -95,6 +103,7 @@ export function FloatingCart() {
           </div>
         </>
       )}
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} allowGuest={false} onSuccess={() => navigate({ to: "/checkout" })} />
     </>
   );
 }
