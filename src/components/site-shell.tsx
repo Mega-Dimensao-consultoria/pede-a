@@ -3,6 +3,7 @@ import { Home, ShoppingBag, User, LayoutDashboard } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { FloatingCart } from "@/components/floating-cart";
 import type { ReactNode } from "react";
 
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -31,6 +32,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <main className="flex-1 pb-20">{children}</main>
+      <FloatingCart />
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t bg-card flex max-w-2xl mx-auto">
         <NavItem to="/" icon={Home} label="Início" />
         <NavItem to="/carrinho" icon={ShoppingBag} label="Cesto" badge={count || undefined} />
