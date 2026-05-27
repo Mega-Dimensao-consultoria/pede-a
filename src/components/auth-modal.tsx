@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { maskPhone, onlyDigits } from "@/lib/format";
 import { Mail, MessageCircle, Loader2 } from "lucide-react";
@@ -19,6 +20,24 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
   const [busy, setBusy] = useState(false);
+  const [oauthBusy, setOauthBusy] = useState<"google" | "apple" | null>(null);
+
+  const signInOAuth = async (provider: "google" | "apple") => {
+    setOauthBusy(provider);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (err: any) {
+      toast.error(err?.message || `Erro ao entrar com ${provider}`);
+    } finally {
+      setOauthBusy(null);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +92,20 @@ export function AuthModal({ open, onOpenChange, onSuccess }: { open: boolean; on
           <DialogTitle>Entre para continuar</DialogTitle>
           <DialogDescription>Acesse sua conta para salvar o carrinho.</DialogDescription>
         </DialogHeader>
+        <div className="space-y-2">
+          <Button type="button" variant="outline" className="w-full gap-2" onClick={() => signInOAuth("google")} disabled={!!oauthBusy}>
+            {oauthBusy === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon className="h-4 w-4" />}
+            Continuar com Google
+          </Button>
+          <Button type="button" variant="outline" className="w-full gap-2" onClick={() => signInOAuth("apple")} disabled={!!oauthBusy}>
+            {oauthBusy === "apple" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AppleIcon className="h-4 w-4" />}
+            Continuar com Apple
+          </Button>
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ou</span></div>
+          </div>
+        </div>
         <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="login">Entrar</TabsTrigger>
