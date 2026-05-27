@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BR_STATES } from "@/lib/br-states";
 import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2, AlertCircle, CheckCircle2, Link2, Link2Off } from "lucide-react";
-import { lovable } from "@/integrations/lovable";
 import { maskPhone, maskCPF, maskCEP, onlyDigits, isValidCPF } from "@/lib/format";
 import { toast } from "sonner";
 
