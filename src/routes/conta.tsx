@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BR_STATES } from "@/lib/br-states";
-import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { LogOut, User, Mail, MessageCircle, LayoutDashboard, ShoppingBag, Plus, MapPin, Pencil, Trash2, Star, Loader2, AlertCircle, CheckCircle2, Link2, Link2Off } from "lucide-react";
+import { lovable } from "@/integrations/lovable";
 import { maskPhone, maskCPF, maskCEP, onlyDigits, isValidCPF } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -63,6 +64,48 @@ function ContaPage() {
   const [addrModal, setAddrModal] = useState<{ open: boolean; data: Partial<Address> }>({ open: false, data: emptyAddress() });
   const [savingAddr, setSavingAddr] = useState(false);
   const [cepBusy, setCepBusy] = useState(false);
+
+  const [identities, setIdentities] = useState<Array<{ id: string; identity_id?: string; provider: string; identity_data?: any; created_at?: string }>>([]);
+  const [identitiesLoading, setIdentitiesLoading] = useState(false);
+  const [identityBusy, setIdentityBusy] = useState<string | null>(null);
+
+  const loadIdentities = useCallback(async () => {
+    setIdentitiesLoading(true);
+    const { data } = await supabase.auth.getUserIdentities();
+    setIdentities((data?.identities as any) ?? []);
+    setIdentitiesLoading(false);
+  }, []);
+
+  useEffect(() => { if (user) loadIdentities(); }, [user, loadIdentities]);
+
+  const connectProvider = async (provider: "google" | "apple") => {
+    setIdentityBusy(provider);
+    try {
+      const { error } = await (supabase.auth as any).linkIdentity({
+        provider,
+        options: { redirectTo: `${window.location.origin}/conta` },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast.error(err?.message || `Erro ao conectar ${provider}`);
+    } finally {
+      setIdentityBusy(null);
+    }
+  };
+
+  const disconnectProvider = async (identity: any) => {
+    if (identities.length <= 1) {
+      toast.error("Você precisa manter ao menos uma forma de acesso.");
+      return;
+    }
+    if (!confirm(`Desconectar conta ${identity.provider}?`)) return;
+    setIdentityBusy(identity.provider);
+    const { error } = await (supabase.auth as any).unlinkIdentity(identity);
+    setIdentityBusy(null);
+    if (error) return toast.error(error.message || "Erro ao desconectar");
+    toast.success("Conta desconectada");
+    loadIdentities();
+  };
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
@@ -248,6 +291,58 @@ function ContaPage() {
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <span>{profile?.email || user.email}</span>
               </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Contas conectadas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {identitiesLoading ? (
+              <div className="text-sm text-muted-foreground">Carregando...</div>
+            ) : (
+              (["google", "apple"] as const).map((p) => {
+                const linked = identities.find((i) => i.provider === p);
+                const label = p === "google" ? "Google" : "Apple";
+                return (
+                  <div key={p} className="flex items-center justify-between border rounded-lg p-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">{label}</div>
+                        {linked ? (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {linked.identity_data?.email || "Conectado"}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-muted-foreground">Não conectado</div>
+                        )}
+                      </div>
+                    </div>
+                    {linked ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => disconnectProvider(linked)}
+                        disabled={identityBusy === p || identities.length <= 1}
+                      >
+                        {identityBusy === p ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2Off className="h-3 w-3 mr-1" />}
+                        Desconectar
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={() => connectProvider(p)} disabled={identityBusy === p}>
+                        {identityBusy === p ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2 className="h-3 w-3 mr-1" />}
+                        Conectar
+                      </Button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+            {identities.length <= 1 && identities.some((i) => i.provider !== "email") && (
+              <p className="text-xs text-muted-foreground">Para desconectar, mantenha pelo menos uma forma de acesso.</p>
             )}
           </CardContent>
         </Card>
