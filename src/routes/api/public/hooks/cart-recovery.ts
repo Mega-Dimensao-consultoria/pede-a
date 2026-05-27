@@ -47,8 +47,7 @@ export const Route = createFileRoute('/api/public/hooks/cart-recovery')({
           return Response.json({ error: 'query_failed' }, { status: 500 })
         }
 
-        const baseUrl = new URL(import.meta.env.VITE_SUPABASE_URL || 'https://pedeai.megadimensao.com.br').origin
-        // Prefer published custom domain for the recovery link
+        // Recovery links always point to the published storefront
         const siteBase = 'https://pedeai.megadimensao.com.br'
 
         const template = TEMPLATES['cart-recovery']
