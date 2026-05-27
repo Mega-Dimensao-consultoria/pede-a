@@ -1,9 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthModal } from "@/components/auth-modal";
 import { Button } from "@/components/ui/button";
 import { fmtBRL } from "@/lib/format";
 import { Trash2, Minus, Plus, ShoppingBag, AlertCircle } from "lucide-react";
@@ -17,23 +19,17 @@ function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [authOpen, setAuthOpen] = useState(false);
   const { data: store } = useQuery<any>({
     queryKey: ["store_config"],
     queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
   });
   const open = isStoreOpen((store?.horarios as Horarios) || null);
 
-  if (!user) {
-    return (
-      <SiteShell>
-        <div className="max-w-2xl mx-auto p-8 text-center space-y-4">
-          <ShoppingBag className="h-14 w-14 mx-auto text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Faça login para ver seu cesto</h2>
-          <Link to="/auth"><Button>Entrar / Cadastrar</Button></Link>
-        </div>
-      </SiteShell>
-    );
-  }
+  const goCheckout = () => {
+    if (!user) { setAuthOpen(true); return; }
+    navigate({ to: "/checkout" });
+  };
 
   return (
     <SiteShell>
@@ -50,7 +46,10 @@ function CartPage() {
       )}
       <div className="max-w-2xl mx-auto p-4 space-y-3">
         {items.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">Seu cesto está vazio.</div>
+          <div className="text-center py-12 text-muted-foreground">
+            <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            Seu cesto está vazio.
+          </div>
         )}
         {items.map((it) => (
           <div key={it.id} className="bg-card border rounded-xl p-3 flex gap-3">
@@ -84,12 +83,13 @@ function CartPage() {
               <div className="text-xs text-muted-foreground">Subtotal</div>
               <div className="text-xl font-bold">{fmtBRL(subtotal)}</div>
             </div>
-            <Button size="lg" disabled={!open} onClick={() => navigate({ to: "/checkout" })}>
+            <Button size="lg" disabled={!open} onClick={goCheckout}>
               {open ? "Finalizar pedido" : "Loja fechada"}
             </Button>
           </div>
         </div>
       )}
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} allowGuest={false} onSuccess={() => navigate({ to: "/checkout" })} />
     </SiteShell>
   );
 }
