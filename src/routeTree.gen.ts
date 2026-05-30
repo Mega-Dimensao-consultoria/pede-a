@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SucessoOrderIdRouteImport } from './routes/sucesso.$orderId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as PedidoNumeroRouteImport } from './routes/pedido.$numero'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AdminProdutosRouteImport } from './routes/admin/produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
@@ -69,6 +70,11 @@ const SucessoOrderIdRoute = SucessoOrderIdRouteImport.update({
 const ProdutoIdRoute = ProdutoIdRouteImport.update({
   id: '/produto/$id',
   path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoNumeroRoute = PedidoNumeroRouteImport.update({
+  id: '/pedido/$numero',
+  path: '/pedido/$numero',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pedido/$numero': typeof PedidoNumeroRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pedido/$numero': typeof PedidoNumeroRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pedido/$numero': typeof PedidoNumeroRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/sucesso/$orderId': typeof SucessoOrderIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/email/unsubscribe'
+    | '/pedido/$numero'
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/email/unsubscribe'
+    | '/pedido/$numero'
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/email/unsubscribe'
+    | '/pedido/$numero'
     | '/produto/$id'
     | '/sucesso/$orderId'
     | '/lovable/email/suppression'
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  PedidoNumeroRoute: typeof PedidoNumeroRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   SucessoOrderIdRoute: typeof SucessoOrderIdRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/produto/$id'
       fullPath: '/produto/$id'
       preLoaderRoute: typeof ProdutoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$numero': {
+      id: '/pedido/$numero'
+      path: '/pedido/$numero'
+      fullPath: '/pedido/$numero'
+      preLoaderRoute: typeof PedidoNumeroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -472,6 +492,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  PedidoNumeroRoute: PedidoNumeroRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   SucessoOrderIdRoute: SucessoOrderIdRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
