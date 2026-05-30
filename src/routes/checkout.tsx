@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BR_STATES } from "@/lib/br-states";
 import { fmtBRL, isValidCPF, maskCEP, maskCPF, onlyDigits } from "@/lib/format";
 import { toast } from "sonner";
-import { MapPin, Store, CreditCard, QrCode, Loader2, Plus } from "lucide-react";
+import { MapPin, Store, CreditCard, QrCode, Loader2, Plus, Utensils, Banknote } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/checkout")({
 function Checkout() {
   const { items, subtotal, clear } = useCart();
   const { user, profile } = useAuth();
+  const { modoComanda } = useStoreConfig();
   const navigate = useNavigate();
 
   const { data: bairros = [] } = useQuery({
@@ -45,7 +47,16 @@ function Checkout() {
         .order("created_at", { ascending: true })).data ?? [],
   });
 
-  const [tipo, setTipo] = useState<"entrega" | "retirada">("entrega");
+  const [tipo, setTipo] = useState<"entrega" | "retirada" | "consumo_local">(
+    "entrega",
+  );
+  // Default the type to consumo_local when comanda mode is active
+  useEffect(() => {
+    if (modoComanda && tipo === "entrega") setTipo("consumo_local");
+  }, [modoComanda]); // eslint-disable-line
+  const [mesa, setMesa] = useState("");
+  const [comandaNome, setComandaNome] = useState("");
+  const [comandaWhatsapp, setComandaWhatsapp] = useState("");
   const [bairroId, setBairroId] = useState<string>("");
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [addingNew, setAddingNew] = useState(false);
@@ -60,7 +71,7 @@ function Checkout() {
   const [cepBusy, setCepBusy] = useState(false);
   const [emitirNF, setEmitirNF] = useState(false);
   const [cpf, setCpf] = useState(profile?.cpf || "");
-  const [pagamento, setPagamento] = useState<"cartao" | "pix">("pix");
+  const [pagamento, setPagamento] = useState<"cartao" | "pix" | "dinheiro" | "cartao_maquina">("pix");
   const [busy, setBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -117,6 +128,41 @@ function Checkout() {
   };
 
   const finalizar = async () => {
+    // ----- COMANDA MODE: usa RPC sem exigir login -----
+    if (modoComanda) {
+      if (!comandaNome.trim()) return toast.error("Informe seu nome");
+      if (tipo === "consumo_local" && !mesa.trim()) return toast.error("Informe o número da mesa");
+      setBusy(true);
+      try {
+        const itemsSnapshot = items.map((it) => ({
+          product_id: it.product_id,
+          nome: it.product?.nome,
+          size: it.size,
+          addons: it.addons,
+          quantidade: it.quantidade,
+          preco_unit: it.preco_unit,
+          observacoes: it.observacoes,
+        }));
+        const { data, error } = await (supabase as any).rpc("create_comanda_order", {
+          _items: itemsSnapshot,
+          _cliente_nome: comandaNome.trim(),
+          _mesa: tipo === "consumo_local" ? mesa.trim() : null,
+          _tipo: tipo,
+          _pagamento: pagamento,
+          _cpf: cpf ? onlyDigits(cpf) : null,
+          _whatsapp: comandaWhatsapp ? onlyDigits(comandaWhatsapp) : null,
+        });
+        if (error) throw error;
+        const row = Array.isArray(data) ? data[0] : data;
+        setSubmitted(true);
+        navigate({ to: "/pedido/$numero", params: { numero: String(row.numero) } });
+        clear().catch(() => {});
+      } catch (e: any) {
+        toast.error(e.message || "Erro ao finalizar");
+      } finally { setBusy(false); }
+      return;
+    }
+
     if (!user) return;
     let enderecoPayload: any = null;
     if (tipo === "entrega") {
@@ -196,12 +242,18 @@ function Checkout() {
 
   return (
     <SiteShell>
-      <header className="bg-card border-b p-4"><div className="max-w-2xl mx-auto"><h1 className="text-xl font-bold">Finalizar Pedido</h1></div></header>
+      <header className="bg-card border-b p-4"><div className="max-w-2xl mx-auto"><h1 className="text-xl font-bold">{modoComanda ? "Fazer Pedido (Comanda)" : "Finalizar Pedido"}</h1></div></header>
       <div className="max-w-2xl mx-auto p-4 space-y-5">
         {/* Tipo */}
         <section>
           <h2 className="font-semibold mb-2">Como deseja receber?</h2>
-          <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as any)} className="grid grid-cols-2 gap-2">
+          <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as any)} className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {modoComanda && (
+              <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "consumo_local" ? "border-primary bg-accent" : ""}`}>
+                <RadioGroupItem value="consumo_local" className="sr-only" />
+                <Utensils className="h-4 w-4" /> Consumir aqui
+              </Label>
+            )}
             <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "entrega" ? "border-primary bg-accent" : ""}`}>
               <RadioGroupItem value="entrega" className="sr-only" />
               <MapPin className="h-4 w-4" /> Entrega
@@ -213,7 +265,31 @@ function Checkout() {
           </RadioGroup>
         </section>
 
-        {tipo === "entrega" && (
+        {modoComanda && (
+          <section className="space-y-3 bg-card border rounded-lg p-4">
+            <h2 className="font-semibold">Seus dados</h2>
+            <div>
+              <Label>Nome *</Label>
+              <Input value={comandaNome} onChange={(e) => setComandaNome(e.target.value)} placeholder="Seu nome" />
+            </div>
+            {tipo === "consumo_local" && (
+              <div>
+                <Label>Número da mesa *</Label>
+                <Input value={mesa} onChange={(e) => setMesa(e.target.value)} placeholder="Ex.: 12" inputMode="numeric" />
+              </div>
+            )}
+            <div>
+              <Label>WhatsApp (opcional)</Label>
+              <Input value={comandaWhatsapp} onChange={(e) => setComandaWhatsapp(e.target.value)} placeholder="(00) 00000-0000" />
+            </div>
+            <div>
+              <Label>CPF (opcional)</Label>
+              <Input value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="Para nota fiscal" />
+            </div>
+          </section>
+        )}
+
+        {!modoComanda && tipo === "entrega" && (
           <>
             <section>
               <h2 className="font-semibold mb-2">Bairro</h2>
@@ -304,12 +380,16 @@ function Checkout() {
         )}
 
         <section className="space-y-3">
+          {!modoComanda && (
+          <>
           <div className="flex items-center justify-between">
             <Label htmlFor="nf" className="font-semibold">Emitir Nota Fiscal</Label>
             <Switch id="nf" checked={emitirNF} onCheckedChange={setEmitirNF} />
           </div>
           {emitirNF && (
             <Input placeholder="CPF (000.000.000-00)" value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} />
+          )}
+          </>
           )}
         </section>
 
@@ -320,8 +400,18 @@ function Checkout() {
               <RadioGroupItem value="pix" className="sr-only" /><QrCode className="h-4 w-4" /> PIX
             </Label>
             <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${pagamento === "cartao" ? "border-primary bg-accent" : ""}`}>
-              <RadioGroupItem value="cartao" className="sr-only" /><CreditCard className="h-4 w-4" /> Cartão na entrega
+              <RadioGroupItem value="cartao" className="sr-only" /><CreditCard className="h-4 w-4" /> {modoComanda ? "Cartão" : "Cartão na entrega"}
             </Label>
+            {modoComanda && (
+              <>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${pagamento === "dinheiro" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="dinheiro" className="sr-only" /><Banknote className="h-4 w-4" /> Dinheiro
+                </Label>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${pagamento === "cartao_maquina" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="cartao_maquina" className="sr-only" /><CreditCard className="h-4 w-4" /> Cartão (maquininha)
+                </Label>
+              </>
+            )}
           </RadioGroup>
 
           {pagamento === "pix" && (
