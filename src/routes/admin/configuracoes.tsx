@@ -12,7 +12,7 @@ import { maskCNPJ, onlyDigits, maskPhone, maskCEP } from "@/lib/format";
 import { BR_STATES } from "@/lib/br-states";
 import { DOW_LABELS, type Horarios } from "@/lib/store-status";
 import { toast } from "sonner";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Info } from "lucide-react";
 
 export const Route = createFileRoute("/admin/configuracoes")({ component: ConfigAdmin });
 
@@ -30,7 +30,7 @@ function ConfigAdmin() {
   const [f, setF] = useState<any>({
     nome: "", cnpj: "", telefone: "", whatsapp: "",
     cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", uf: "",
-    pix_key: "", pix_qr_url: "", horarios: defaultHor,
+    pix_key: "", pix_qr_url: "", horarios: defaultHor, modo_comanda: false,
   });
   useEffect(() => {
     if (store) {
@@ -46,6 +46,7 @@ function ConfigAdmin() {
         uf: (store as any).uf || "",
         pix_key: store.pix_key || "",
         pix_qr_url: store.pix_qr_url || "", horarios: (store.horarios as any) || defaultHor,
+        modo_comanda: !!(store as any).modo_comanda,
       });
     }
   }, [store]);
@@ -111,6 +112,7 @@ function ConfigAdmin() {
       uf: f.uf || null,
       pix_key: f.pix_key || null, pix_qr_url: f.pix_qr_url || null,
       horarios: f.horarios as any,
+      modo_comanda: !!f.modo_comanda,
     };
     const { error } = f.id
       ? await supabase.from("store_config").update(payload as any).eq("id", f.id)
@@ -174,8 +176,31 @@ function ConfigAdmin() {
 
         <section className="bg-card border rounded-xl p-4 space-y-3">
           <h2 className="font-semibold">PIX</h2>
-          <div><Label>Chave PIX</Label><Input value={f.pix_key} onChange={(e) => setF({ ...f, pix_key: e.target.value })} placeholder="email@exemplo.com / CPF / chave aleatória" /></div>
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-lg p-3 text-xs flex gap-2">
+            <Info className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+            <div>
+              <p className="font-medium text-amber-900 dark:text-amber-200">Esses dados aparecem no QR Code real do PIX.</p>
+              <p className="text-amber-800 dark:text-amber-300 mt-1">Use a chave PIX exata, o nome do titular e a cidade cadastrados no seu banco. Caso contrário, o pagador pode ver dados errados ou o PIX pode não ser aceito.</p>
+            </div>
+          </div>
+          <div><Label>Chave PIX (real, da conta que vai receber)</Label><Input value={f.pix_key} onChange={(e) => setF({ ...f, pix_key: e.target.value })} placeholder="email@dominio.com / CPF / CNPJ / telefone / chave aleatória" /></div>
+          <p className="text-xs text-muted-foreground">Nome do titular e cidade são puxados de "Dados da loja" e "Endereço da loja" acima.</p>
           <div><Label>URL do QR Code (opcional)</Label><Input value={f.pix_qr_url} onChange={(e) => setF({ ...f, pix_qr_url: e.target.value })} placeholder="https://..." /></div>
+        </section>
+
+        <section className="bg-card border rounded-xl p-4 space-y-3">
+          <h2 className="font-semibold">Modo Comanda Digital</h2>
+          <p className="text-xs text-muted-foreground">
+            Ative para transformar o sistema em uma comanda de mesa: o cliente (ou garçom) faz pedidos pelo tablet/celular sem precisar cadastrar endereço,
+            cada pedido recebe um número, e o pagamento é registrado pelo administrador na finalização.
+          </p>
+          <div className="flex items-center justify-between border rounded-lg p-3">
+            <div>
+              <Label htmlFor="comanda" className="font-medium">Ativar modo comanda</Label>
+              <p className="text-xs text-muted-foreground">Desativa endereço/CEP/CPF obrigatório e libera mesa + consumo no local.</p>
+            </div>
+            <Switch id="comanda" checked={!!f.modo_comanda} onCheckedChange={(v) => setF({ ...f, modo_comanda: v })} />
+          </div>
         </section>
 
         <section className="bg-card border rounded-xl p-4 space-y-2">
