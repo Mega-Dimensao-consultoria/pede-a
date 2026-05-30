@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { fmtBRL } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, MessageCircle, Copy } from "lucide-react";
+import { CheckCircle2, MessageCircle, Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { PixPayment } from "@/components/pix-payment";
 
@@ -48,9 +48,14 @@ function Sucesso() {
     <SiteShell>
       <div className="max-w-xl mx-auto p-4 space-y-4">
         <div className="bg-card border rounded-xl p-6 text-center">
-          <CheckCircle2 className="h-14 w-14 mx-auto text-primary mb-3" />
+          <CheckCircle2 className="h-12 w-12 mx-auto text-primary mb-2" />
           <h1 className="text-2xl font-bold">Pedido confirmado!</h1>
-          <p className="text-muted-foreground">Número <strong>#{order.numero}</strong></p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mt-3">Seu número de pedido</p>
+          <div className="text-6xl font-bold text-primary my-1">#{order.numero}</div>
+          {(order as any).mesa && <p className="text-sm">Mesa <strong>{(order as any).mesa}</strong></p>}
+          <Link to="/pedido/$numero" params={{ numero: String(order.numero) }} className="inline-flex items-center gap-1 text-sm text-primary underline mt-2">
+            <Eye className="h-3 w-3" /> Acompanhar status
+          </Link>
         </div>
 
         {order.pagamento === "pix" && (
