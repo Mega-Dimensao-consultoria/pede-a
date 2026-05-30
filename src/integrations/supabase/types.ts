@@ -250,8 +250,10 @@ export type Database = {
           endereco: Json | null
           id: string
           items: Json
+          mesa: string | null
           numero: number
           pagamento: Database["public"]["Enums"]["payment_method"]
+          pagamento_registrado: Json | null
           payment_proof_deleted_at: string | null
           payment_proof_path: string | null
           payment_proof_uploaded_at: string | null
@@ -261,7 +263,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["order_type"]
           total: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -274,8 +276,10 @@ export type Database = {
           endereco?: Json | null
           id?: string
           items?: Json
+          mesa?: string | null
           numero?: number
           pagamento?: Database["public"]["Enums"]["payment_method"]
+          pagamento_registrado?: Json | null
           payment_proof_deleted_at?: string | null
           payment_proof_path?: string | null
           payment_proof_uploaded_at?: string | null
@@ -285,7 +289,7 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["order_type"]
           total?: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -298,8 +302,10 @@ export type Database = {
           endereco?: Json | null
           id?: string
           items?: Json
+          mesa?: string | null
           numero?: number
           pagamento?: Database["public"]["Enums"]["payment_method"]
+          pagamento_registrado?: Json | null
           payment_proof_deleted_at?: string | null
           payment_proof_path?: string | null
           payment_proof_uploaded_at?: string | null
@@ -309,7 +315,7 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["order_type"]
           total?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -417,6 +423,7 @@ export type Database = {
           endereco: string | null
           horarios: Json
           id: string
+          modo_comanda: boolean
           nome: string
           numero: string | null
           pix_key: string | null
@@ -436,6 +443,7 @@ export type Database = {
           endereco?: string | null
           horarios?: Json
           id?: string
+          modo_comanda?: boolean
           nome?: string
           numero?: string | null
           pix_key?: string | null
@@ -455,6 +463,7 @@ export type Database = {
           endereco?: string | null
           horarios?: Json
           id?: string
+          modo_comanda?: boolean
           nome?: string
           numero?: string | null
           pix_key?: string | null
@@ -622,6 +631,21 @@ export type Database = {
     }
     Functions: {
       cleanup_old_payment_proofs: { Args: never; Returns: undefined }
+      create_comanda_order: {
+        Args: {
+          _cliente_nome: string
+          _cpf?: string
+          _items: Json
+          _mesa: string
+          _pagamento: string
+          _tipo: string
+          _whatsapp?: string
+        }
+        Returns: {
+          id: string
+          numero: number
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -629,6 +653,18 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_order_public_status: {
+        Args: { _numero: number }
+        Returns: {
+          cliente_nome: string
+          created_at: string
+          mesa: string
+          numero: number
+          status: string
+          tipo: string
+          total: number
+        }[]
       }
       get_pix_payment_info: {
         Args: { _order_id: string }
@@ -684,6 +720,15 @@ export type Database = {
           read_ct: number
         }[]
       }
+      register_order_payment: {
+        Args: {
+          _metodo: string
+          _observacao?: string
+          _order_id: string
+          _valor: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
@@ -695,8 +740,10 @@ export type Database = {
         | "saiu"
         | "concluido"
         | "cancelado"
-      order_type: "retirada" | "entrega"
-      payment_method: "cartao" | "pix"
+        | "pronto"
+        | "pago"
+      order_type: "retirada" | "entrega" | "consumo_local"
+      payment_method: "cartao" | "pix" | "dinheiro" | "cartao_maquina"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -833,9 +880,11 @@ export const Constants = {
         "saiu",
         "concluido",
         "cancelado",
+        "pronto",
+        "pago",
       ],
-      order_type: ["retirada", "entrega"],
-      payment_method: ["cartao", "pix"],
+      order_type: ["retirada", "entrega", "consumo_local"],
+      payment_method: ["cartao", "pix", "dinheiro", "cartao_maquina"],
     },
   },
 } as const
