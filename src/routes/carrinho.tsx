@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { AuthModal } from "@/components/auth-modal";
 import { Button } from "@/components/ui/button";
 import { fmtBRL } from "@/lib/format";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/carrinho")({
 function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
+  const { modoComanda } = useStoreConfig();
   const navigate = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
   const { data: store } = useQuery<any>({
@@ -27,7 +29,7 @@ function CartPage() {
   const open = isStoreOpen((store?.horarios as Horarios) || null);
 
   const goCheckout = () => {
-    if (!user) { setAuthOpen(true); return; }
+    if (!user && !modoComanda) { setAuthOpen(true); return; }
     navigate({ to: "/checkout" });
   };
 
