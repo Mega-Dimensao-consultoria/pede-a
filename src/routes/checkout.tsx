@@ -31,10 +31,6 @@ function Checkout() {
     queryKey: ["bairros"],
     queryFn: async () => (await supabase.from("neighborhood_delivery").select("*").eq("ativo", true).order("nome")).data ?? [],
   });
-  const { data: store } = useQuery({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data,
-  });
   const { data: savedAddresses = [], refetch: reloadAddresses } = useQuery({
     queryKey: ["my_addresses", user?.id],
     enabled: !!user,
