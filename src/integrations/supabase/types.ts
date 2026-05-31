@@ -583,6 +583,7 @@ export type Database = {
           endereco: string | null
           horarios: Json | null
           id: string | null
+          modo_comanda: boolean | null
           nome: string | null
           numero: string | null
           pix_qr_url: string | null
@@ -600,6 +601,7 @@ export type Database = {
           endereco?: string | null
           horarios?: Json | null
           id?: string | null
+          modo_comanda?: boolean | null
           nome?: string | null
           numero?: string | null
           pix_qr_url?: string | null
@@ -617,6 +619,7 @@ export type Database = {
           endereco?: string | null
           horarios?: Json | null
           id?: string | null
+          modo_comanda?: boolean | null
           nome?: string | null
           numero?: string | null
           pix_qr_url?: string | null
