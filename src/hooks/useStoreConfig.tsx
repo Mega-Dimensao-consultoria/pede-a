@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 export function useStoreConfig() {
   const q = useQuery({
     queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
+    queryFn: async () => {
+      const { data } = await supabase.from("store_config_public").select("*").limit(1);
+      return Array.isArray(data) ? data[0] ?? null : data;
+    },
     staleTime: 60_000,
   });
   return {
