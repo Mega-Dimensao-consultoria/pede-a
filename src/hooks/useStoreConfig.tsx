@@ -3,8 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useStoreConfig() {
   const q = useQuery({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
+    queryKey: ["store_config_public_row"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("store_config_public").select("*").limit(1);
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] ?? null : (data as any);
+      return row;
+    },
     staleTime: 60_000,
   });
   return {

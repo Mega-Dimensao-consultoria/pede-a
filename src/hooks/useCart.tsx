@@ -158,7 +158,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     const g = readGuest();
-    if (!g) throw new Error("guest_email_required");
     const newItem: CartItem = {
       id: crypto.randomUUID(),
       user_id: "guest",
@@ -173,7 +172,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const next = [...readLocalItems(), newItem];
     writeLocalItems(next);
     setItems(next);
-    await syncGuestServer(next, g);
+    if (g) await syncGuestServer(next, g);
   };
 
   const updateQty = async (id: string, qty: number) => {
