@@ -604,13 +604,11 @@ export type Database = {
       get_order_public_status: {
         Args: { _numero: number }
         Returns: {
-          cliente_nome: string
           created_at: string
           mesa: string
           numero: number
           status: string
           tipo: string
-          total: number
         }[]
       }
       get_pix_payment_info: {
