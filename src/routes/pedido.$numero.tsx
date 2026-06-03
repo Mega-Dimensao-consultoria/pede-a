@@ -49,7 +49,6 @@ function PedidoPublico() {
           <div className="text-xs text-muted-foreground uppercase tracking-wide">Pedido</div>
           <div className="text-6xl font-bold text-primary my-2">#{data.numero}</div>
           {data.mesa && <div className="text-sm">Mesa <strong>{data.mesa}</strong></div>}
-          {data.cliente_nome && <div className="text-sm text-muted-foreground">{data.cliente_nome}</div>}
         </div>
         <div className={`bg-card border rounded-2xl p-6 text-center space-y-2`}>
           <Icon className={`h-12 w-12 mx-auto ${info.color}`} />

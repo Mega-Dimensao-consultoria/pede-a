@@ -26,7 +26,15 @@ function genToken() {
 export const Route = createFileRoute('/api/public/hooks/cart-recovery')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const serviceKeyAuth = process.env.SUPABASE_SERVICE_ROLE_KEY
+        const apiKeyAuth = process.env.LOVABLE_API_KEY
+        const authHeader = request.headers.get('Authorization') || ''
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
+        const ok = !!token && ((serviceKeyAuth && token === serviceKeyAuth) || (apiKeyAuth && token === apiKeyAuth))
+        if (!ok) {
+          return Response.json({ error: 'unauthorized' }, { status: 401 })
+        }
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
         if (!supabaseUrl || !serviceKey) {
