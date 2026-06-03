@@ -26,7 +26,6 @@ function genToken() {
 export const Route = createFileRoute('/api/public/hooks/cart-recovery')({
   server: {
     handlers: {
-      POST: async () => {
       POST: async ({ request }) => {
         const serviceKeyAuth = process.env.SUPABASE_SERVICE_ROLE_KEY
         const apiKeyAuth = process.env.LOVABLE_API_KEY
