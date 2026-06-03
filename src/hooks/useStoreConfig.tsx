@@ -5,7 +5,7 @@ export function useStoreConfig() {
   const q = useQuery({
     queryKey: ["store_config_public_row"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("store_config_public").select("*").limit(1);
+      const { data, error } = await supabase.rpc("get_store_public" as any);
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] ?? null : (data as any);
       return row;
