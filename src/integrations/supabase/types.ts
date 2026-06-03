@@ -582,6 +582,7 @@ export type Database = {
         Args: {
           _cliente_nome: string
           _cpf?: string
+          _endereco?: Json
           _items: Json
           _mesa: string
           _pagamento: string
@@ -708,7 +709,7 @@ export type Database = {
         | "cancelado"
         | "pronto"
         | "pago"
-      order_type: "retirada" | "entrega" | "consumo_local"
+      order_type: "retirada" | "entrega" | "consumo_local" | "viagem"
       payment_method: "cartao" | "pix" | "dinheiro" | "cartao_maquina"
     }
     CompositeTypes: {
@@ -849,7 +850,7 @@ export const Constants = {
         "pronto",
         "pago",
       ],
-      order_type: ["retirada", "entrega", "consumo_local"],
+      order_type: ["retirada", "entrega", "consumo_local", "viagem"],
       payment_method: ["cartao", "pix", "dinheiro", "cartao_maquina"],
     },
   },
