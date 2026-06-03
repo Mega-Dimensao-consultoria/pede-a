@@ -23,7 +23,7 @@ const defaultHor: Horarios = Object.fromEntries(
 function ConfigAdmin() {
   const qc = useQueryClient();
   const { data: store } = useQuery({
-    queryKey: ["store_config"],
+    queryKey: ["store_config_admin"],
     queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data,
   });
 

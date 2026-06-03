@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
+import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { fmtBRL } from "@/lib/format";
 import { isStoreOpen, type Horarios } from "@/lib/store-status";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [catId, setCatId] = useState<string | null>(null);
 
-  const { data: store } = useQuery({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
-  });
+  const { store } = useStoreConfig();
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () =>

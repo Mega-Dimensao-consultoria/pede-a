@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { ShoppingBag, Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { AuthModal } from "@/components/auth-modal";
-import { supabase } from "@/integrations/supabase/client";
 import { isStoreOpen, type Horarios } from "@/lib/store-status";
 import { Button } from "@/components/ui/button";
 import { fmtBRL } from "@/lib/format";
@@ -14,15 +12,10 @@ import { fmtBRL } from "@/lib/format";
 export function FloatingCart() {
   const { items, count, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
-  const { modoComanda } = useStoreConfig();
+  const { store, modoComanda } = useStoreConfig();
   const [open, setOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const navigate = useNavigate();
-
-  const { data: store } = useQuery<any>({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
-  });
   const storeOpen = isStoreOpen((store?.horarios as Horarios) || null);
 
   if (count === 0) return null;

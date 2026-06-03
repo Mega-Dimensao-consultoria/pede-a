@@ -1,7 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,13 +17,9 @@ export const Route = createFileRoute("/carrinho")({
 function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
-  const { modoComanda } = useStoreConfig();
+  const { store, modoComanda } = useStoreConfig();
   const navigate = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
-  const { data: store } = useQuery<any>({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config_public").select("*").maybeSingle()).data,
-  });
   const open = isStoreOpen((store?.horarios as Horarios) || null);
 
   const goCheckout = () => {
