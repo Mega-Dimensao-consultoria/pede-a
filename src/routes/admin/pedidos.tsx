@@ -34,7 +34,7 @@ function PedidosAdmin() {
     queryFn: async () => (await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(200)).data ?? [],
     refetchInterval: 10000,
   });
-  const { data: store } = useQuery({ queryKey: ["store_config"], queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data });
+  const { data: store } = useQuery({ queryKey: ["store_config_admin"], queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data });
   const modoComanda = !!(store as any)?.modo_comanda;
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
+import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { fmtBRL } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, MessageCircle, Copy, Eye } from "lucide-react";
@@ -16,10 +17,7 @@ function Sucesso() {
     queryKey: ["order", orderId],
     queryFn: async () => (await supabase.from("orders").select("*").eq("id", orderId).maybeSingle()).data,
   });
-  const { data: store } = useQuery({
-    queryKey: ["store_config"],
-    queryFn: async () => (await supabase.from("store_config").select("*").maybeSingle()).data,
-  });
+  const { store } = useStoreConfig();
 
   if (isLoading) return <SiteShell><div className="p-8 text-center">Carregando...</div></SiteShell>;
   if (!order) return <SiteShell><div className="p-8 text-center">Pedido não encontrado.</div></SiteShell>;
