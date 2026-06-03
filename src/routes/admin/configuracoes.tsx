@@ -118,7 +118,11 @@ function ConfigAdmin() {
       ? await supabase.from("store_config").update(payload as any).eq("id", f.id)
       : await supabase.from("store_config").insert(payload as any);
     if (error) toast.error(error.message);
-    else { toast.success("Configurações salvas"); qc.invalidateQueries({ queryKey: ["store_config"] }); }
+    else {
+      toast.success("Configurações salvas");
+      qc.invalidateQueries({ queryKey: ["store_config_admin"] });
+      qc.invalidateQueries({ queryKey: ["store_config_public_row"] });
+    }
   };
 
   const setHor = (dow: string, patch: any) => setF((p: any) => ({ ...p, horarios: { ...p.horarios, [dow]: { ...p.horarios[dow], ...patch } } }));
