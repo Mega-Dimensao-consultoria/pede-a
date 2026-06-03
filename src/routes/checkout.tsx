@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BR_STATES } from "@/lib/br-states";
 import { fmtBRL, isValidCPF, maskCEP, maskCPF, onlyDigits } from "@/lib/format";
 import { toast } from "sonner";
-import { MapPin, Store, CreditCard, QrCode, Loader2, Plus, Utensils, Banknote } from "lucide-react";
+import { MapPin, Store, CreditCard, QrCode, Loader2, Plus, Utensils, Banknote, Bike, ShoppingBag, Search } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -43,12 +43,13 @@ function Checkout() {
         .order("created_at", { ascending: true })).data ?? [],
   });
 
-  const [tipo, setTipo] = useState<"entrega" | "retirada" | "consumo_local">(
+  const [tipo, setTipo] = useState<"entrega" | "retirada" | "consumo_local" | "viagem">(
     "entrega",
   );
-  // Default the type to consumo_local when comanda mode is active
+  // Default to consumo_local in comanda mode if currently on a non-comanda type
   useEffect(() => {
-    if (modoComanda && tipo === "entrega") setTipo("consumo_local");
+    if (modoComanda && tipo === "retirada") setTipo("consumo_local");
+    if (!modoComanda && (tipo === "consumo_local" || tipo === "viagem")) setTipo("entrega");
   }, [modoComanda]); // eslint-disable-line
   const [mesa, setMesa] = useState("");
   const [comandaNome, setComandaNome] = useState("");
@@ -65,6 +66,12 @@ function Checkout() {
   const [cidade, setCidade] = useState("");
   const [uf, setUf] = useState("");
   const [cepBusy, setCepBusy] = useState(false);
+  const [cepSearchOpen, setCepSearchOpen] = useState(false);
+  const [cepSearchUf, setCepSearchUf] = useState("");
+  const [cepSearchCidade, setCepSearchCidade] = useState("");
+  const [cepSearchRua, setCepSearchRua] = useState("");
+  const [cepSearchBusy, setCepSearchBusy] = useState(false);
+  const [cepSearchResults, setCepSearchResults] = useState<any[]>([]);
   const [emitirNF, setEmitirNF] = useState(false);
   const [cpf, setCpf] = useState(profile?.cpf || "");
   const [pagamento, setPagamento] = useState<"cartao" | "pix" | "dinheiro" | "cartao_maquina">("pix");
@@ -123,11 +130,54 @@ function Checkout() {
     } finally { setCepBusy(false); }
   };
 
+  const buscarCepPorEndereco = async () => {
+    if (cepSearchUf.length !== 2) return toast.error("Informe a UF (2 letras)");
+    if (cepSearchCidade.trim().length < 3) return toast.error("Cidade precisa ter ao menos 3 letras");
+    if (cepSearchRua.trim().length < 3) return toast.error("Rua precisa ter ao menos 3 letras");
+    setCepSearchBusy(true);
+    setCepSearchResults([]);
+    try {
+      const url = `https://viacep.com.br/ws/${cepSearchUf}/${encodeURIComponent(cepSearchCidade.trim())}/${encodeURIComponent(cepSearchRua.trim())}/json/`;
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!Array.isArray(j) || j.length === 0) {
+        toast.error("Nenhum CEP encontrado");
+      } else {
+        setCepSearchResults(j);
+      }
+    } catch {
+      toast.error("Erro buscando CEPs");
+    } finally { setCepSearchBusy(false); }
+  };
+
+  const selecionarCepEncontrado = (r: any) => {
+    setCep(maskCEP(r.cep || ""));
+    setRua(r.logradouro || cepSearchRua);
+    setBairroNome(r.bairro || "");
+    setCidade(r.localidade || cepSearchCidade);
+    setUf(r.uf || cepSearchUf);
+    setCepSearchOpen(false);
+    setCepSearchResults([]);
+  };
+
   const finalizar = async () => {
     // ----- COMANDA MODE: usa RPC sem exigir login -----
     if (modoComanda) {
       if (!comandaNome.trim()) return toast.error("Informe seu nome");
       if (tipo === "consumo_local" && !mesa.trim()) return toast.error("Informe o número da mesa");
+      let comandaEndereco: any = null;
+      if (tipo === "entrega") {
+        if (!rua.trim() || !numero.trim()) return toast.error("Preencha rua e número para delivery");
+        comandaEndereco = {
+          cep: onlyDigits(cep) || null,
+          rua: rua.trim(),
+          numero: numero.trim(),
+          complemento: complemento || null,
+          bairro: bairroNome || null,
+          cidade: cidade || null,
+          uf: uf || null,
+        };
+      }
       setBusy(true);
       try {
         const itemsSnapshot = items.map((it) => ({
@@ -147,6 +197,7 @@ function Checkout() {
           _pagamento: pagamento,
           _cpf: cpf ? onlyDigits(cpf) : null,
           _whatsapp: comandaWhatsapp ? onlyDigits(comandaWhatsapp) : null,
+          _endereco: comandaEndereco,
         });
         if (error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
@@ -244,20 +295,33 @@ function Checkout() {
         <section>
           <h2 className="font-semibold mb-2">Como deseja receber?</h2>
           <RadioGroup value={tipo} onValueChange={(v) => setTipo(v as any)} className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {modoComanda && (
-              <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "consumo_local" ? "border-primary bg-accent" : ""}`}>
-                <RadioGroupItem value="consumo_local" className="sr-only" />
-                <Utensils className="h-4 w-4" /> Consumir aqui
-              </Label>
+            {modoComanda ? (
+              <>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "consumo_local" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="consumo_local" className="sr-only" />
+                  <Utensils className="h-4 w-4" /> Consumir aqui
+                </Label>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "viagem" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="viagem" className="sr-only" />
+                  <ShoppingBag className="h-4 w-4" /> Para viagem
+                </Label>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "entrega" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="entrega" className="sr-only" />
+                  <Bike className="h-4 w-4" /> Delivery
+                </Label>
+              </>
+            ) : (
+              <>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "entrega" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="entrega" className="sr-only" />
+                  <MapPin className="h-4 w-4" /> Entrega
+                </Label>
+                <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "retirada" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="retirada" className="sr-only" />
+                  <Store className="h-4 w-4" /> Retirada
+                </Label>
+              </>
             )}
-            <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "entrega" ? "border-primary bg-accent" : ""}`}>
-              <RadioGroupItem value="entrega" className="sr-only" />
-              <MapPin className="h-4 w-4" /> Entrega
-            </Label>
-            <Label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer ${tipo === "retirada" ? "border-primary bg-accent" : ""}`}>
-              <RadioGroupItem value="retirada" className="sr-only" />
-              <Store className="h-4 w-4" /> Retirada
-            </Label>
           </RadioGroup>
         </section>
 
@@ -281,6 +345,86 @@ function Checkout() {
             <div>
               <Label>CPF (opcional)</Label>
               <Input value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="Para nota fiscal" />
+            </div>
+          </section>
+        )}
+
+        {modoComanda && tipo === "entrega" && (
+          <section className="space-y-3 bg-card border rounded-lg p-4">
+            <h2 className="font-semibold">Endereço de entrega</h2>
+            <div>
+              <Label>CEP</Label>
+              <div className="flex gap-2">
+                <Input placeholder="00000-000" value={cep} onChange={(e) => setCep(maskCEP(e.target.value))} onBlur={buscarCep} inputMode="numeric" />
+                <Button type="button" variant="outline" onClick={buscarCep} disabled={cepBusy}>
+                  {cepBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Buscar"}
+                </Button>
+              </div>
+              <button
+                type="button"
+                className="text-xs text-primary underline mt-1"
+                onClick={() => setCepSearchOpen((v) => !v)}
+              >
+                Não sei o CEP
+              </button>
+            </div>
+
+            {cepSearchOpen && (
+              <div className="space-y-2 border rounded-md p-3 bg-muted/40">
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label>UF</Label>
+                    <Select value={cepSearchUf} onValueChange={setCepSearchUf}>
+                      <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                      <SelectContent>
+                        {BR_STATES.map((s) => (<SelectItem key={s.uf} value={s.uf}>{s.uf}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2"><Label>Cidade</Label><Input value={cepSearchCidade} onChange={(e) => setCepSearchCidade(e.target.value)} /></div>
+                </div>
+                <div><Label>Rua / Logradouro</Label><Input value={cepSearchRua} onChange={(e) => setCepSearchRua(e.target.value)} /></div>
+                <Button type="button" variant="outline" size="sm" onClick={buscarCepPorEndereco} disabled={cepSearchBusy}>
+                  {cepSearchBusy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                  Buscar CEPs
+                </Button>
+                {cepSearchResults.length > 0 && (
+                  <div className="max-h-48 overflow-y-auto space-y-1 mt-2">
+                    {cepSearchResults.map((r, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selecionarCepEncontrado(r)}
+                        className="w-full text-left text-sm border rounded-md p-2 bg-background hover:bg-accent"
+                      >
+                        <div className="font-medium">{r.cep}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {r.logradouro}{r.complemento ? ` - ${r.complemento}` : ""} • {r.bairro} • {r.localidade}/{r.uf}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2"><Label>Rua *</Label><Input value={rua} onChange={(e) => setRua(e.target.value)} /></div>
+              <div><Label>Número *</Label><Input value={numero} onChange={(e) => setNumero(e.target.value)} /></div>
+            </div>
+            <div><Label>Complemento</Label><Input value={complemento} onChange={(e) => setComplemento(e.target.value)} /></div>
+            <div><Label>Bairro</Label><Input value={bairroNome} onChange={(e) => setBairroNome(e.target.value)} /></div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2"><Label>Cidade</Label><Input value={cidade} onChange={(e) => setCidade(e.target.value)} /></div>
+              <div>
+                <Label>UF</Label>
+                <Select value={uf} onValueChange={setUf}>
+                  <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                  <SelectContent>
+                    {BR_STATES.map((s) => (<SelectItem key={s.uf} value={s.uf}>{s.uf}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </section>
         )}
