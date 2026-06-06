@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RecuperarRouteImport } from './routes/recuperar'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -32,6 +33,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicHooksCartRecoveryRouteImport } from './routes/api/public/hooks/cart-recovery'
 
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecuperarRoute = RecuperarRouteImport.update({
   id: '/recuperar',
   path: '/recuperar',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
   '/recuperar': typeof RecuperarRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
   '/recuperar': typeof RecuperarRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
   '/recuperar': typeof RecuperarRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/admin/bairros': typeof AdminBairrosRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/conta'
     | '/recuperar'
+    | '/robots.txt'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/conta'
     | '/recuperar'
+    | '/robots.txt'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/conta'
     | '/recuperar'
+    | '/robots.txt'
     | '/admin/bairros'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContaRoute: typeof ContaRoute
   RecuperarRoute: typeof RecuperarRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   AdminBairrosRoute: typeof AdminBairrosRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
@@ -322,6 +335,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recuperar': {
       id: '/recuperar'
       path: '/recuperar'
@@ -486,6 +506,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContaRoute: ContaRoute,
   RecuperarRoute: RecuperarRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   AdminBairrosRoute: AdminBairrosRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
