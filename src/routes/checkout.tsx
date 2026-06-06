@@ -342,10 +342,6 @@ function Checkout() {
               <Label>WhatsApp (opcional)</Label>
               <Input value={comandaWhatsapp} onChange={(e) => setComandaWhatsapp(e.target.value)} placeholder="(00) 00000-0000" />
             </div>
-            <div>
-              <Label>CPF (opcional)</Label>
-              <Input value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} placeholder="Para nota fiscal" />
-            </div>
           </section>
         )}
 
