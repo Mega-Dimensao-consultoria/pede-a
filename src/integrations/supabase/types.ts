@@ -578,6 +578,10 @@ export type Database = {
     }
     Functions: {
       cleanup_old_payment_proofs: { Args: never; Returns: undefined }
+      comanda_attach_payment_proof: {
+        Args: { _order_id: string; _path: string }
+        Returns: undefined
+      }
       create_comanda_order: {
         Args: {
           _cliente_nome: string
@@ -606,10 +610,15 @@ export type Database = {
         Args: { _numero: number }
         Returns: {
           created_at: string
+          id: string
           mesa: string
           numero: number
+          pagamento: string
+          payment_proof_path: string
           status: string
           tipo: string
+          total: number
+          user_id: string
         }[]
       }
       get_pix_payment_info: {
