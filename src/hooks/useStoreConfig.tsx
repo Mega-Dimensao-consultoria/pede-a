@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isStoreOpen, type Horarios } from "@/lib/store-status";
 
 export function useStoreConfig() {
   const q = useQuery({
@@ -15,6 +16,10 @@ export function useStoreConfig() {
   return {
     store: q.data,
     modoComanda: !!(q.data as any)?.modo_comanda,
+    storeOpen:
+      !!(q.data as any)?.modo_comanda
+        ? true
+        : isStoreOpen(((q.data as any)?.horarios as Horarios) || null),
     isLoading: q.isLoading,
   };
 }

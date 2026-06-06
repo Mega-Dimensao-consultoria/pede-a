@@ -8,7 +8,6 @@ import { AuthModal } from "@/components/auth-modal";
 import { Button } from "@/components/ui/button";
 import { fmtBRL } from "@/lib/format";
 import { Trash2, Minus, Plus, ShoppingBag, AlertCircle } from "lucide-react";
-import { isStoreOpen, type Horarios } from "@/lib/store-status";
 
 export const Route = createFileRoute("/carrinho")({
   component: CartPage,
@@ -17,10 +16,9 @@ export const Route = createFileRoute("/carrinho")({
 function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
-  const { store, modoComanda } = useStoreConfig();
+  const { modoComanda, storeOpen: open } = useStoreConfig();
   const navigate = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
-  const open = isStoreOpen((store?.horarios as Horarios) || null);
 
   const goCheckout = () => {
     if (!user && !modoComanda) { setAuthOpen(true); return; }

@@ -3,20 +3,18 @@ import { useNavigate } from "@tanstack/react-router";
 import { ShoppingBag, Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
-import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { AuthModal } from "@/components/auth-modal";
-import { isStoreOpen, type Horarios } from "@/lib/store-status";
+import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { Button } from "@/components/ui/button";
 import { fmtBRL } from "@/lib/format";
 
 export function FloatingCart() {
   const { items, count, subtotal, updateQty, remove } = useCart();
   const { user } = useAuth();
-  const { store, modoComanda } = useStoreConfig();
+  const { modoComanda, storeOpen } = useStoreConfig();
   const [open, setOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const navigate = useNavigate();
-  const storeOpen = isStoreOpen((store?.horarios as Horarios) || null);
 
   if (count === 0) return null;
 

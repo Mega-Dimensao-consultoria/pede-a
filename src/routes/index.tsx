@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site-shell";
 import { useStoreConfig } from "@/hooks/useStoreConfig";
 import { fmtBRL } from "@/lib/format";
-import { isStoreOpen, type Horarios } from "@/lib/store-status";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, UtensilsCrossed } from "lucide-react";
 
@@ -16,7 +15,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [catId, setCatId] = useState<string | null>(null);
 
-  const { store } = useStoreConfig();
+  const { store, storeOpen: open } = useStoreConfig();
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () =>
@@ -30,8 +29,6 @@ function Index() {
       return (await q.order("nome")).data ?? [];
     },
   });
-
-  const open = isStoreOpen((store?.horarios as Horarios) || null);
 
   return (
     <SiteShell>
