@@ -672,6 +672,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      guest_payment_proof_path_ok: { Args: { _path: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
