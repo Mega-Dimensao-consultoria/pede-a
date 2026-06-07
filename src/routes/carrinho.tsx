@@ -11,6 +11,13 @@ import { Trash2, Minus, Plus, ShoppingBag, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/carrinho")({
   component: CartPage,
+  head: () => ({
+    meta: [
+      { title: "Seu carrinho — Pede Aí" },
+      { name: "description", content: "Revise os itens do seu pedido, ajuste quantidades e siga para o checkout com pagamento via PIX." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function CartPage() {

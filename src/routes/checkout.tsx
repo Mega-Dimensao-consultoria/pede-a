@@ -19,6 +19,13 @@ import { MapPin, Store, CreditCard, QrCode, Loader2, Plus, Utensils, Banknote, B
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
+  head: () => ({
+    meta: [
+      { title: "Finalizar pedido — Pede Aí" },
+      { name: "description", content: "Confirme seus dados, escolha entrega ou consumo no local e finalize seu pedido com pagamento via PIX." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function Checkout() {

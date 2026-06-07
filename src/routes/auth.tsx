@@ -6,6 +6,13 @@ import { SiteShell } from "@/components/site-shell";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Entrar — Pede Aí" },
+      { name: "description", content: "Acesse sua conta no Pede Aí para acompanhar pedidos, salvar endereços e finalizar a compra mais rápido." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function AuthPage() {

@@ -9,7 +9,16 @@ import { CheckCircle2, MessageCircle, Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { PixPayment } from "@/components/pix-payment";
 
-export const Route = createFileRoute("/sucesso/$orderId")({ component: Sucesso });
+export const Route = createFileRoute("/sucesso/$orderId")({
+  component: Sucesso,
+  head: () => ({
+    meta: [
+      { title: "Pedido confirmado — Pede Aí" },
+      { name: "description", content: "Seu pedido foi recebido! Acompanhe o status, finalize o pagamento via PIX e veja os detalhes da entrega." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+});
 
 function Sucesso() {
   const { orderId } = Route.useParams();

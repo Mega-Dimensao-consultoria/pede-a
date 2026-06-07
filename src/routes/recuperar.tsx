@@ -10,6 +10,13 @@ export const Route = createFileRoute('/recuperar')({
     token: typeof s.token === 'string' ? s.token : '',
   }),
   component: RecuperarPage,
+  head: () => ({
+    meta: [
+      { title: "Recuperar carrinho — Pede Aí" },
+      { name: "description", content: "Restauramos os itens do seu carrinho a partir do link recebido para você continuar o pedido de onde parou." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 })
 
 function RecuperarPage() {
