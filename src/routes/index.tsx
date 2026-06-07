@@ -10,6 +10,20 @@ import { AlertCircle, UtensilsCrossed } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Pede Aí — Cardápio Digital para pedidos no balcão, mesa e delivery" },
+      { name: "description", content: "Monte seu pedido pelo cardápio digital e pague via PIX. Atendimento no balcão, mesa ou delivery." },
+      { property: "og:title", content: "Pede Aí — Cardápio Digital" },
+      { property: "og:description", content: "Monte seu pedido pelo cardápio digital e pague via PIX." },
+      { property: "og:url", content: "https://pedeai.megadimensao.com.br/" },
+      { name: "twitter:title", content: "Pede Aí — Cardápio Digital" },
+      { name: "twitter:description", content: "Monte seu pedido pelo cardápio digital e pague via PIX." },
+    ],
+    links: [
+      { rel: "canonical", href: "https://pedeai.megadimensao.com.br/" },
+    ],
+  }),
 });
 
 function Index() {
