@@ -83,11 +83,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "Pede Aí — Cardápio Digital" },
       { name: "twitter:description", content: "Faça seu pedido pelo cardápio digital." },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:site_name", content: "Pede Aí" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Pede Aí",
+          url: "https://pedeai.megadimensao.com.br",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Pede Aí",
+          url: "https://pedeai.megadimensao.com.br",
+        }),
       },
     ],
   }),

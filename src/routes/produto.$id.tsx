@@ -20,7 +20,7 @@ export const Route = createFileRoute("/produto/$id")({
   loader: async ({ params }) => {
     const { data } = await supabase
       .from("products")
-      .select("id, nome, descricao, imagem_url, imagens")
+      .select("id, nome, descricao, imagem_url, imagens, preco_base")
       .eq("id", params.id)
       .maybeSingle();
     return { product: data };
@@ -51,9 +51,34 @@ export const Route = createFileRoute("/produto/$id")({
       meta.push({ name: "twitter:image", content: img });
       meta.push({ name: "twitter:card", content: "summary_large_image" });
     }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (p) {
+      const productLd: Record<string, unknown> = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: p.nome,
+        description: p.descricao ?? undefined,
+        image: img ? [img] : undefined,
+        url,
+      };
+      if (typeof (p as any).preco_base === "number") {
+        productLd.offers = {
+          "@type": "Offer",
+          price: (p as any).preco_base.toFixed(2),
+          priceCurrency: "BRL",
+          availability: "https://schema.org/InStock",
+          url,
+        };
+      }
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify(productLd),
+      });
+    }
     return {
       meta,
       links: [{ rel: "canonical", href: url }],
+      scripts,
     };
   },
 });
