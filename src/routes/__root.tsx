@@ -82,8 +82,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:title", content: "Pede Aí — Cardápio Digital" },
       { name: "twitter:description", content: "Faça seu pedido pelo cardápio digital." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b89d130-6ab0-4bb2-a794-7dcbfbca6de0/id-preview-d46abeab--a0cee1fb-f82e-4ad7-bff0-290263e9afdc.lovable.app-1778688898978.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b89d130-6ab0-4bb2-a794-7dcbfbca6de0/id-preview-d46abeab--a0cee1fb-f82e-4ad7-bff0-290263e9afdc.lovable.app-1778688898978.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
