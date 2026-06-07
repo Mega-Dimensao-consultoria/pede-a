@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RecuperarRouteImport } from './routes/recuperar'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
@@ -47,6 +48,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const RecuperarRoute = RecuperarRouteImport.update({
   id: '/recuperar',
   path: '/recuperar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recuperar': typeof RecuperarRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recuperar': typeof RecuperarRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/conta': typeof ContaRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recuperar': typeof RecuperarRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/llms.txt'
     | '/recuperar'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/llms.txt'
     | '/recuperar'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/conta'
+    | '/llms.txt'
     | '/recuperar'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
   ContaRoute: typeof ContaRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   RecuperarRoute: typeof RecuperarRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -367,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/recuperar'
       fullPath: '/recuperar'
       preLoaderRoute: typeof RecuperarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
   ContaRoute: ContaRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   RecuperarRoute: RecuperarRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
