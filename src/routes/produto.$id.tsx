@@ -17,6 +17,45 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
   component: ProductPage,
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("products")
+      .select("id, nome, descricao, imagem_url, imagens")
+      .eq("id", params.id)
+      .maybeSingle();
+    return { product: data };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.product;
+    const url = `https://pedeai.megadimensao.com.br/produto/${params.id}`;
+    const title = p?.nome ? `${p.nome} — Pede Aí` : "Produto — Pede Aí";
+    const description =
+      p?.descricao?.slice(0, 160) ??
+      "Veja os detalhes do produto e adicione ao seu pedido.";
+    const img: string | undefined =
+      (Array.isArray((p as any)?.imagens) && (p as any).imagens[0]) ||
+      p?.imagem_url ||
+      undefined;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "product" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+    ];
+    if (img) {
+      meta.push({ property: "og:image", content: img });
+      meta.push({ name: "twitter:image", content: img });
+      meta.push({ name: "twitter:card", content: "summary_large_image" });
+    }
+    return {
+      meta,
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
 
 function ProductPage() {
