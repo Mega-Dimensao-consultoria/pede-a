@@ -17,6 +17,13 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/conta")({
   component: ContaPage,
+  head: () => ({
+    meta: [
+      { title: "Minha conta — Pede Aí" },
+      { name: "description", content: "Gerencie seus dados, endereços e veja o histórico dos seus pedidos no Pede Aí." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 type Address = {

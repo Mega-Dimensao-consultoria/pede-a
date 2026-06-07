@@ -10,7 +10,16 @@ import { buildPixPayload } from "@/lib/pix";
 import { fmtBRL } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pedido/$numero")({ component: PedidoPublico });
+export const Route = createFileRoute("/pedido/$numero")({
+  component: PedidoPublico,
+  head: ({ params }) => ({
+    meta: [
+      { title: `Pedido #${params.numero} — Pede Aí` },
+      { name: "description", content: `Acompanhe em tempo real o status do pedido #${params.numero}: confirmação, preparo, retirada ou entrega.` },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+});
 
 const STATUS_INFO: Record<string, { label: string; desc: string; icon: any; color: string }> = {
   pendente:   { label: "Pendente",   desc: "Aguardando confirmação do restaurante", icon: Clock,         color: "text-amber-600" },
