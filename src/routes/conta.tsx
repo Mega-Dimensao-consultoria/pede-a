@@ -456,14 +456,14 @@ function ContaPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     {!a.is_default && (
-                      <Button size="icon" variant="ghost" onClick={() => setDefault(a.id)} title="Definir como padrão">
+                      <Button size="icon" variant="ghost" onClick={() => setDefault(a.id)} title="Definir como padrão" aria-label="Definir como padrão">
                         <Star className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" onClick={() => openEditAddr(a)}>
+                    <Button size="icon" variant="ghost" onClick={() => openEditAddr(a)} aria-label="Editar endereço">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => deleteAddress(a.id)}>
+                    <Button size="icon" variant="ghost" onClick={() => deleteAddress(a.id)} aria-label="Excluir endereço">
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
