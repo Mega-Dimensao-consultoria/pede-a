@@ -64,14 +64,14 @@ function CartPage() {
               {it.observacoes && <div className="text-xs italic text-muted-foreground">"{it.observacoes}"</div>}
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center border rounded-full">
-                  <button onClick={() => updateQty(it.id, it.quantidade - 1)} className="p-1.5"><Minus className="h-3 w-3" /></button>
+                  <button onClick={() => updateQty(it.id, it.quantidade - 1)} aria-label="Diminuir quantidade" className="p-1.5"><Minus className="h-3 w-3" /></button>
                   <span className="w-7 text-center text-sm font-semibold">{it.quantidade}</span>
-                  <button onClick={() => updateQty(it.id, it.quantidade + 1)} className="p-1.5"><Plus className="h-3 w-3" /></button>
+                  <button onClick={() => updateQty(it.id, it.quantidade + 1)} aria-label="Aumentar quantidade" className="p-1.5"><Plus className="h-3 w-3" /></button>
                 </div>
                 <div className="font-bold text-primary">{fmtBRL(it.preco_unit * it.quantidade)}</div>
               </div>
             </div>
-            <button onClick={() => remove(it.id)} className="text-muted-foreground hover:text-destructive p-1">
+            <button onClick={() => remove(it.id)} aria-label="Remover item" className="text-muted-foreground hover:text-destructive p-1">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>

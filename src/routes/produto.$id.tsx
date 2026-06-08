@@ -147,7 +147,7 @@ function ProductPage() {
   return (
     <SiteShell>
       <div className="relative">
-        <button onClick={() => navigate({ to: "/" })} className="absolute top-3 left-3 z-10 bg-card/90 backdrop-blur rounded-full p-2 shadow">
+        <button onClick={() => navigate({ to: "/" })} aria-label="Voltar" className="absolute top-3 left-3 z-10 bg-card/90 backdrop-blur rounded-full p-2 shadow">
           <ChevronLeft className="h-5 w-5" />
         </button>
         {imagens.length > 0 ? (
@@ -223,9 +223,9 @@ function ProductPage() {
 
         <div className="flex items-center gap-4">
           <div className="flex items-center border rounded-full">
-            <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2"><Minus className="h-4 w-4" /></button>
+            <button onClick={() => setQty(Math.max(1, qty - 1))} aria-label="Diminuir quantidade" className="p-2"><Minus className="h-4 w-4" /></button>
             <span className="w-8 text-center font-semibold">{qty}</span>
-            <button onClick={() => setQty(qty + 1)} className="p-2"><Plus className="h-4 w-4" /></button>
+            <button onClick={() => setQty(qty + 1)} aria-label="Aumentar quantidade" className="p-2"><Plus className="h-4 w-4" /></button>
           </div>
           <Button onClick={handleAdd} className="flex-1 h-12 text-base">
             Adicionar · {fmtBRL(unit * qty)}

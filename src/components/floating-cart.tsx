@@ -52,7 +52,7 @@ export function FloatingCart() {
                 <ShoppingBag className="h-4 w-4" />
                 Meu cesto ({count})
               </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
+              <button onClick={() => setOpen(false)} aria-label="Fechar cesto" className="text-muted-foreground hover:text-foreground p-1">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -70,14 +70,14 @@ export function FloatingCart() {
                     {it.size && <div className="text-[11px] text-muted-foreground">{it.size.label}</div>}
                     <div className="flex items-center justify-between mt-1">
                       <div className="flex items-center border rounded-full">
-                        <button onClick={() => updateQty(it.id, it.quantidade - 1)} className="p-1"><Minus className="h-3 w-3" /></button>
+                        <button onClick={() => updateQty(it.id, it.quantidade - 1)} aria-label="Diminuir quantidade" className="p-1"><Minus className="h-3 w-3" /></button>
                         <span className="w-6 text-center text-xs font-semibold">{it.quantidade}</span>
-                        <button onClick={() => updateQty(it.id, it.quantidade + 1)} className="p-1"><Plus className="h-3 w-3" /></button>
+                        <button onClick={() => updateQty(it.id, it.quantidade + 1)} aria-label="Aumentar quantidade" className="p-1"><Plus className="h-3 w-3" /></button>
                       </div>
                       <div className="text-sm font-bold text-primary">{fmtBRL(it.preco_unit * it.quantidade)}</div>
                     </div>
                   </div>
-                  <button onClick={() => remove(it.id)} className="text-muted-foreground hover:text-destructive self-start p-1">
+                  <button onClick={() => remove(it.id)} aria-label="Remover item" className="text-muted-foreground hover:text-destructive self-start p-1">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
