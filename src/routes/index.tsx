@@ -69,6 +69,7 @@ function Index() {
       )}
 
       <section className="max-w-2xl mx-auto px-4 py-4">
+        <h2 className="sr-only">Cardápio</h2>
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
           <button
             onClick={() => setCatId(null)}
